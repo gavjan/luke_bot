@@ -1,4 +1,4 @@
-from cons import env
+from cons import env, err_exit
 import discord
 
 
@@ -11,11 +11,15 @@ def main():
 
     @client.event
     async def on_message(message):
-        if message.author == client.user:
-            return
+        try:
 
-        if message.content.startswith("/hello"):
-            await message.channel.send("Astcu barev")
+            if message.author == client.user:
+                return
+
+            if message.content.startswith("/hello"):
+                await message.channel.send("Astcu barev")
+        except Exception as e:
+            err_exit(e)
 
     client.run(env("bot_token"))
 
