@@ -6,13 +6,6 @@ from urllib.request import Request, urlopen
 from urllib.parse import quote
 
 
-def env(name):
-    assert_folder("../.env")
-    f = open(f"../.env/{name}.env", "r")
-    val = f.read()
-    f.close()
-    return val
-
 
 def assert_folder(name):
     if not os.path.exists(name):
