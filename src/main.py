@@ -1,7 +1,8 @@
-from cons import env, err_exit
+from cons import err_exit
 import discord
 import os
 
+ADMIN_ID = 213341816324489217
 def main():
     client = discord.Client()
 
@@ -15,9 +16,11 @@ def main():
 
             if message.author == client.user:
                 return
-
-            if message.content.startswith("/hello"):
+            elif message.content.startswith("/hello"):
                 await message.channel.send("Astcu barev")
+            elif message.content.startswith("/restart_luke") and message.author.id == ADMIN_ID:
+              await message.reply("ok")
+              exit(0)
         except Exception as e:
             err_exit(e)
 
