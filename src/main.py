@@ -1,6 +1,6 @@
 from cons import env, err_exit
 import discord
-
+import os
 
 def main():
     client = discord.Client()
@@ -21,7 +21,7 @@ def main():
         except Exception as e:
             err_exit(e)
 
-    client.run(env("bot_token"))
+    client.run(os.getenv("bot_token"))
 
 
 if __name__ == "__main__":
