@@ -8,7 +8,8 @@ def main():
 
     @client.event
     async def on_ready():
-        print(f"vjjjjjjjjjjj {client}")
+        await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="Holy Music"))
+        print(f"started {client}")
 
     @client.event
     async def on_message(message):

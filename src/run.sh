@@ -8,10 +8,10 @@ send_mail() {
   -X POST \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
-  -H "X-Postmark-Server-Token: $mail_token" \
+  -H "X-Postmark-Server-Token: $(cat ../.env/mail_token.env)" \
   -d "{
-  \"From\": \"$mail\",
-  \"To\": \"$mail\",
+  \"From\": \"$(cat ../.env/mail.env)\",
+  \"To\": \"$(cat cat ../.env/mail.env)\",
   \"Subject\": \"[Luke] Bot Error\",
   \"TextBody\": \"$(cat .err_file)\",
   \"MessageStream\": \"outbound\"
