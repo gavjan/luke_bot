@@ -1,6 +1,6 @@
 import glob
 import re
-from cons import load_html, save_json, print_json
+from cons import load_html, save_json, print_json, load_json
 
 name_map = {
     "2 Յովհաննէս": ["john2", "Յովհաննէս 2"],
@@ -118,8 +118,18 @@ def parse(which):
 
 
 def main():
-    parse("new")
-    parse("old")
+    #parse("new")
+    #parse("old")
+    new = load_json("old_bible")
+    all_verses = []
+    for gospel in new:
+        for section in new[gospel]:
+            if section != "name":
+                for verse in new[gospel][section]:
+                    all_verses.append({"gospel": gospel, "section": section, "verse": verse})
+
+    print_json(all_verses)
+    print(len(all_verses))
 
 
 if __name__ == "__main__":
