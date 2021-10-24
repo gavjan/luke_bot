@@ -1,8 +1,8 @@
-from cons import err_exit
+from cons import *
+from query import parse_query
 import discord
-import os
 
-ADMIN_ID = 213341816324489217
+
 def main():
     client = discord.Client()
 
@@ -13,18 +13,24 @@ def main():
     @client.event
     async def on_message(message):
         try:
-
             if message.author == client.user:
                 return
-            elif message.content.startswith("/hello"):
-                await message.channel.send("Astcu barev")
-            elif message.content.startswith("/restart_luke") and message.author.id == ADMIN_ID:
-              await message.reply("ok")
-              exit(0)
+            action, response = parse_query(message)
+            if action == actions.SEND:
+                await message.channel.send(response)
+            elif action == actions.REPLY:
+                await message.reply(response)
+            elif action == actions.ERR:
+                await message.reply(embed=response)
+            elif action == actions.EMBED:
+                await message.channel.send(embed=response)
+            elif action == actions.EXIT:
+                await message.reply(response)
+                exit(0)
         except Exception as e:
             err_exit(e)
 
-    client.run(os.getenv("bot_token"))
+    client.run(getenv("bot_token"))
 
 
 if __name__ == "__main__":
