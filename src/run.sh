@@ -1,5 +1,6 @@
 pip3 install BeautifulSoup4
 pip3 install discord
+pip3 install discord-py-slash-command
 
 send_mail() {
   echo "Sending error mail..."
