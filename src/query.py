@@ -1,4 +1,5 @@
-from cons import load_json, actions, eprint, ADMIN_ID
+from cons import load_json, actions, eprint, ADMIN_ID, SEED, START_DATE, err_exit
+from datetime import date, datetime
 import re
 import discord
 import random
@@ -36,7 +37,7 @@ def add_keys(embed, bible, to_embed=True):
     return embed
 
 
-def get_help(new):
+def get_help():
     global help_embed
     if help_embed is None:
         title = "*/verse [gospel_alias] [section].[start]-[end]*"
@@ -48,7 +49,7 @@ def get_help(new):
     return help_embed
 
 
-def get_old(old):
+def get_old():
     global old_embed
     if old_embed is None:
         old_embed = discord.Embed(
@@ -72,10 +73,12 @@ def get_verse(bible, gospel, group, start, end):
     return actions.EMBED, embed
 
 
-def random_verse(new, old):
+def random_verse():
     def rand_key(json):
-        key, val = random.choice(list(json.items()))
-        return key
+        arr = list(json.keys())
+        if "name" in arr:
+            arr.remove("name")
+        return random.choice(arr)
 
     bible = random.choice([new, old])
     gospel = rand_key(bible)
@@ -84,18 +87,20 @@ def random_verse(new, old):
     return get_verse(bible, gospel, group, verse, verse)
 
 
+old = load_json("old_bible")
+new = load_json("new_bible")
+
+
 def parse_verse(query):
-    old = load_json("old_bible")
-    new = load_json("new_bible")
     err = ""
 
     if re.match(r"^\s*/verse\s*$", query):
-        return random_verse(new, old)
+        return random_verse()
 
     if re.match(r"^\s*/verse\s+help\s*", query):
-        return actions.EMBED, get_help(new)
+        return actions.EMBED, get_help()
     if re.match(r"^\s*/verse\s+old\s*", query):
-        return actions.EMBED, get_old(old)
+        return actions.EMBED, get_old()
     tokenized = re.findall(r"/verse\s+([a-z0-9]{1,10})\s+(\d{1,3})[.:](\d{1,3})(-\d{0,3})?\s*$", query)
     for gospel, group, start, end in tokenized:
         end = end[1:]
@@ -119,6 +124,42 @@ def parse_verse(query):
                               color=discord.Color.red())
 
     return actions.ERR, err_embed
+
+
+def daily_verse():
+    all_verses = []
+
+    def add_verses(arr, _bible):
+        for _gospel in _bible:
+            for _section in _bible[_gospel]:
+                if _section != "name":
+                    for _verse in _bible[_gospel][_section]:
+                        arr.append({"gospel": _gospel, "section": _section, "verse": _verse})
+
+    add_verses(all_verses, new)
+    add_verses(all_verses, old)
+
+    random.seed(SEED)
+    random.shuffle(all_verses)
+
+    start = datetime.date(datetime.strptime(START_DATE, "%Y-%m-%d"))
+    delta = date.today() - start
+    today_i = delta.days
+
+    todays = all_verses[today_i]
+    gospel = todays["gospel"]
+    section = todays["section"]
+    verse = todays["section"]
+    bible = None
+    if gospel in new:
+        bible = new
+    elif gospel in old:
+        bible = old
+    else:
+        err_exit(f"{gospel} is neither in old nor in new bible wtf???")
+    action, embed = get_verse(bible, gospel, section, verse, verse)
+    embed.title = "Այսօրվա համար՝ " + embed.title
+    return embed
 
 
 def parse_query(query, debug=False):

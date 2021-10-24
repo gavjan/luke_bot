@@ -7,7 +7,8 @@ from urllib.request import Request, urlopen
 from urllib.parse import quote
 
 ADMIN_ID = 213341816324489217
-
+START_DATE = "2021-10-24"
+SEED = "LUKE"
 
 class actions(enum.Enum):
     SEND = 1
