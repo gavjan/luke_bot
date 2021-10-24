@@ -73,10 +73,14 @@ def get_verse(bible, gospel, group, start, end):
 
 
 def random_verse(new, old):
+    def rand_key(json):
+        key, val = random.choice(list(json.items()))
+        return key
+
     bible = random.choice([new, old])
-    gospel = random.choice(bible)
-    group = random.choice(bible[gospel])
-    verse = random.choice(bible[gospel][group])
+    gospel = rand_key(bible)
+    group = rand_key(bible[gospel])
+    verse = rand_key(bible[gospel][group])
     return get_verse(bible, gospel, group, verse, verse)
 
 
