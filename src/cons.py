@@ -88,7 +88,6 @@ def err_exit(*args, **kwargs):
     eprint("[ERROR] ", end="")
     print(*args, file=sys.stderr, **kwargs)
     eprint("\nPress Enter to exit...")
-    input()
     exit(1)
 
 
