@@ -1,8 +1,7 @@
-- [ ] /verse n
+- [X] /verse n
+- [X] "amen" hotword
 - [ ] /pray
 - [ ] daily seeded random verse
 - [ ] ekegheci vc
 - [ ] patarag
-- [ ] "amen" hotword
 - [ ] qahana.am toner scraper
-

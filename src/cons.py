@@ -1,3 +1,4 @@
+import enum
 import os
 import json
 import sys
@@ -5,6 +6,24 @@ from bs4 import BeautifulSoup as soup
 from urllib.request import Request, urlopen
 from urllib.parse import quote
 
+ADMIN_ID = 213341816324489217
+
+
+class actions(enum.Enum):
+    SEND = 1
+    REPLY = 2
+    ERR = 3
+    IGNORE = 4
+    EMBED = 5
+    EXIT = 6
+
+
+def getenv(name):
+    assert_folder("../.env")
+    f = open(f"../.env/{name}.env", "r")
+    val = f.read()
+    f.close()
+    return val
 
 
 def assert_folder(name):
@@ -61,10 +80,14 @@ def save_json(name, data):
     f.close()
 
 
-def err_exit(*args, **kwargs):
-    print("[ERROR] ", end="", file=sys.stderr)
+def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
-    print("\nPress Enter to exit...", file=sys.stderr)
+
+
+def err_exit(*args, **kwargs):
+    eprint("[ERROR] ", end="")
+    print(*args, file=sys.stderr, **kwargs)
+    eprint("\nPress Enter to exit...")
     input()
     exit(1)
 
