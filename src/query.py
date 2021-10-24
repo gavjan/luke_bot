@@ -1,6 +1,7 @@
 from cons import load_json, actions, eprint, ADMIN_ID
 import re
 import discord
+import random
 
 help_embed = None
 old_embed = None
@@ -59,10 +60,33 @@ def get_old(old):
     return old_embed
 
 
+def get_verse(bible, gospel, group, start, end):
+    title = f'*({bible[gospel]["name"]} {group}.{start}{"" if start == end else f"-{end}"})*'
+    desc = ""
+    start_i = int(start)
+    end_i = int(end)
+    for verse in range(start_i, end_i + 1):
+        desc += f'**{verse}**\t{bible[gospel][group][f"{verse}"]}\n\n'
+
+    embed = discord.Embed(title=title, description=desc, color=discord.Color.blue())
+    return actions.EMBED, embed
+
+
+def random_verse(new, old):
+    bible = random.choice([new, old])
+    gospel = random.choice(bible)
+    group = random.choice(bible[gospel])
+    verse = random.choice(bible[gospel][group])
+    return get_verse(bible, gospel, group, verse, verse)
+
+
 def parse_verse(query):
     old = load_json("old_bible")
     new = load_json("new_bible")
     err = ""
+
+    if re.match(r"^\s*/verse\s*$", query):
+        return random_verse(new, old)
 
     if re.match(r"^\s*/verse\s+help\s*", query):
         return actions.EMBED, get_help(new)
@@ -86,15 +110,7 @@ def parse_verse(query):
         if err != "":
             return actions.ERR, discord.Embed(title="*/verse error*", description=err, color=discord.Color.red())
         else:
-            title = f'*({bible[gospel]["name"]} {group}.{start}{"" if start == end else f"-{end}"})*'
-            desc = ""
-            start_i = int(start)
-            end_i = int(end)
-            for verse in range(start_i, end_i + 1):
-                desc += f'**{verse}**\t{bible[gospel][group][f"{verse}"]}\n\n'
-
-            embed = discord.Embed(title=title, description=desc, color=discord.Color.blue())
-            return actions.EMBED, embed
+            return get_verse(bible, gospel, group, start, end)
     err_embed = discord.Embed(title="*/verse wrong syntax*", description="for correct syntax see: ```/verse help```",
                               color=discord.Color.red())
 
@@ -103,7 +119,7 @@ def parse_verse(query):
 
 def parse_query(query, debug=False):
     content = query if debug else query.content
-    if re.match(r"^\s*/verse\s+", content):
+    if re.match(r"^\s*/verse\s*", content):
         return parse_verse(content)
     if re.search(r"\b(amen|ամեն)\b", content, re.IGNORECASE):
         return actions.REPLY, "Ամեն :pray:"
