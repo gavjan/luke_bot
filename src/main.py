@@ -1,14 +1,20 @@
 from cons import *
 from query import parse_query, daily_verse
 from datetime import datetime, time, timedelta
+from discord_slash import SlashCommand, SlashContext
+from discord_slash.utils.manage_commands import create_option
+from discord.ext import commands
 import asyncio
 import discord
 
 
 def main():
-    client = discord.Client()
+    # client = discord.Client()
     WHEN = time(4, 0, 0)  # 4:00 AM UTC
     default_channel_id = 456178384016244738
+
+    client = commands.Bot(command_prefix="!")
+    slash = SlashCommand(client, sync_commands=True)
 
     @client.event
     async def on_ready():
@@ -55,6 +61,25 @@ def main():
             tomorrow = datetime.combine(now.date() + timedelta(days=1), time(0))
             seconds = (tomorrow - now).total_seconds()
             await asyncio.sleep(seconds)
+
+    @slash.slash(
+        name="pray",
+        description="Pray to God",
+        guild_ids=[839493198371356672, 456178384016244736],
+        options=[
+            create_option(
+                name="text",
+                description="Your prayer",
+                required=True,
+                option_type=3
+            )
+        ]
+    )
+    async def pray(ctx: SlashContext, text: str):
+        embed = discord.Embed(title="Anonymous Prayer", description=text, color=discord.Color.blue())
+        prayer = await ctx.channel.send(embed=embed)
+        await ctx.send(content="Prayer Sent!", delete_after=0.01)
+        await prayer.add_reaction("🙏")
 
     client.loop.create_task(background_task())
     client.run(getenv("bot_token"))

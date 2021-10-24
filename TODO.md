@@ -1,6 +1,6 @@
 - [X] /verse n
 - [X] "amen" hotword
-- [ ] /pray
+- [X] /pray
 - [X] daily seeded random verse
 - [ ] ekegheci vc
 - [ ] patarag
