@@ -164,7 +164,7 @@ def daily_verse():
 
 def parse_query(query, debug=False):
     content = query if debug else query.content
-    if re.match(r"^\s*/test_holiday\s*", content):
+    if re.match(r"^\s*/test_holiday\s*", content) and query.author.id == ADMIN_ID:
         return todays_holiday()
     if re.match(r"^\s*/verse\s*", content):
         return parse_verse(content)
