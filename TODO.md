@@ -4,4 +4,4 @@
 - [X] daily seeded random verse
 - [ ] ekegheci vc
 - [ ] patarag
-- [ ] qahana.am toner scraper
+- [X] qahana.am toner scraper

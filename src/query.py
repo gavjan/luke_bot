@@ -1,4 +1,4 @@
-from cons import load_json, actions, eprint, ADMIN_ID, SEED, START_DATE, err_exit
+from cons import load_json, actions, eprint, ADMIN_ID, SEED, START_DATE, err_exit, load_page
 from datetime import date, datetime
 import re
 import discord
@@ -164,6 +164,8 @@ def daily_verse():
 
 def parse_query(query, debug=False):
     content = query if debug else query.content
+    if re.match(r"^\s*/test\s*", content):
+        return todays_holiday()
     if re.match(r"^\s*/verse\s*", content):
         return parse_verse(content)
     if re.search(r"\b(amen|ամեն)\b", content, re.IGNORECASE):
@@ -182,6 +184,25 @@ def main():
             print(response)
         else:
             eprint(response)
+
+
+def todays_holiday():
+    date.today()
+    url = f"http://www.qahana.am/am/holidays/{date.today()}/1"
+    page = load_page(url)
+
+    holiday_div = page.find("div", {"class": "holidayBox"})
+    if not holiday_div:
+        print("No Holiday today")
+        return actions.IGNORE, ""
+    today = re.sub(r"</?span.*?>", "", str(holiday_div.span)).strip()
+    title = re.sub(r"</?h2.*?>", "", str(holiday_div.h2)).strip()
+    desc = re.sub(r"</?p.*?>", "", str(holiday_div.p)).strip()
+
+    embed = discord.Embed(title=title, url=url, description=desc, color=discord.Color.blue())
+    embed.set_author(name=today)
+    embed.description += f"\n[Ավելին]({url})"
+    return actions.EMBED, embed
 
 
 if __name__ == "__main__":

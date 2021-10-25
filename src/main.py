@@ -1,5 +1,5 @@
 from cons import *
-from query import parse_query, daily_verse
+from query import parse_query, daily_verse, todays_holiday
 from datetime import datetime, time, timedelta
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils.manage_commands import create_option
@@ -10,7 +10,8 @@ import discord
 
 def main():
     # client = discord.Client()
-    WHEN = time(16, 0, 0)  # 4:00 PM UTC
+    WHEN_VERSE = time(16, 0, 0)  # 4:00 PM UTC
+    WHEN_HOLIDAY = time(4, 0, 0)  # 4:00 AM UTC
     default_channel_id = 456178384016244738
 
     client = commands.Bot(command_prefix="!")
@@ -41,23 +42,30 @@ def main():
         except Exception as e:
             err_exit(e)
 
-    async def called_once_a_day():
+    async def daily_verse_task():
         await client.wait_until_ready()
         channel = client.get_channel(default_channel_id)
         await channel.send(embed=daily_verse())
 
-    async def background_task():
+    async def daily_holiday_task():
+        await client.wait_until_ready()
+        channel = client.get_channel(default_channel_id)
+        action, response = todays_holiday()
+        if action == actions.EMBED:
+            await channel.send(embed=response)
+
+    async def background_task(func, when):
         now = datetime.utcnow()
-        if now.time() > WHEN:
+        if now.time() > when:
             tomorrow = datetime.combine(now.date() + timedelta(days=1), time(0))
             seconds = (tomorrow - now).total_seconds()
             await asyncio.sleep(seconds)
         while True:
             now = datetime.utcnow()
-            target_time = datetime.combine(now.date(), WHEN)
+            target_time = datetime.combine(now.date(), when)
             seconds_until_target = (target_time - now).total_seconds()
             await asyncio.sleep(seconds_until_target)
-            await called_once_a_day()
+            await func()
             tomorrow = datetime.combine(now.date() + timedelta(days=1), time(0))
             seconds = (tomorrow - now).total_seconds()
             await asyncio.sleep(seconds)
@@ -81,7 +89,8 @@ def main():
         await ctx.send(content="Prayer Sent!", delete_after=0.01)
         await prayer.add_reaction("🙏")
 
-    client.loop.create_task(background_task())
+    client.loop.create_task(background_task(daily_verse_task, WHEN_VERSE))
+    client.loop.create_task(background_task(daily_holiday_task, WHEN_HOLIDAY))
     client.run(getenv("bot_token"))
 
 

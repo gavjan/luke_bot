@@ -10,6 +10,7 @@ ADMIN_ID = 213341816324489217
 START_DATE = "2021-10-24"
 SEED = "LUKE"
 
+
 class actions(enum.Enum):
     SEND = 1
     REPLY = 2
@@ -113,7 +114,7 @@ def load_page(url, attempt=1):
             if not is_ascii(x):
                 url = url.sub(x, quote(x))
 
-    req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    req = Request(url, headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'})
     try:
         web_byte = urlopen(req).read()
     except:
