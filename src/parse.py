@@ -100,7 +100,8 @@ def parse_gospel(name):
         arr = arr.replace("strong>", "sup>")
         for num, verse in re.findall(r"(\d{1,3})(</sup>.*?<sup>)", arr, re.DOTALL):
             i += 1
-            group[i] = re.sub(r"(\s*</?sup>\s*|\n)", "", verse)
+            group[i] = re.sub(r"(\s*</?sup>\s*)", "", verse)
+            group[i] = group[i].replace("\n", " ")
 
         gospel[group_no] = group
 
