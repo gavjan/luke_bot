@@ -130,4 +130,5 @@ dmypy.json
 .idea/
 
 # Project Specific
-src/.err_file*.html
+src/.err_file
+*.html
