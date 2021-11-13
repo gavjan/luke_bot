@@ -1,4 +1,4 @@
-from cons import load_json, actions, eprint, ADMIN_ID, SEED, START_DATE, err_exit, load_page
+from cons import load_json, actions, eprint, ADMIN_ID, SEED, START_DATE, err_exit, load_page, print_json
 from datetime import date, datetime
 import re
 import discord
@@ -63,9 +63,10 @@ def get_new():
     if new_embed is None:
         new_embed = discord.Embed(
             title="New Testament Aliases",
+            description="",
             color=discord.Color.green()
         )
-        new_embed = add_keys(embed=new_embed, bible=new, to_embed=True),
+        new_embed = add_keys(embed=new_embed, bible=new, to_embed=True)
 
     return new_embed
 
