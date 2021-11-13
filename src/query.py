@@ -4,7 +4,7 @@ import re
 import discord
 import random
 
-help_embed = None
+new_embed = None
 old_embed = None
 
 
@@ -38,13 +38,12 @@ def add_keys(embed, bible, to_embed=True):
 
 
 def get_help():
-    global help_embed
-    if help_embed is None:
-        title = "*/verse [gospel_alias] [section].[start]-[end]*"
-        desc = "example:```/verse tes2 2.9-11```\n"
-        desc += "to get the list of Old Testament aliases type ```/verse old```\n New Testament aliases:"
-        help_embed = discord.Embed(title=title, description=desc, color=discord.Color.green())
-        help_embed = add_keys(embed=help_embed, bible=new, to_embed=True)
+    title = "*/verse [gospel_alias] [section].[start]-[end]*"
+    desc = "example:```/verse tes2 2.9-11```\n"
+    desc += "To get the list of New Testament aliases type ```/verse new```\n"
+    desc += "To get the list of Old Testament aliases type ```/verse old```\n"
+    help_embed = discord.Embed(title=title, description=desc, color=discord.Color.green())
+    # help_embed = add_keys(embed=help_embed, bible=new, to_embed=True)
 
     return help_embed
 
@@ -59,6 +58,18 @@ def get_old():
         )
 
     return old_embed
+
+
+def get_new():
+    global new_embed
+    if new_embed is None:
+        new_embed = discord.Embed(
+            title="New Testament Aliases",
+            color=discord.Color.green()
+        )
+        new_embed = add_keys(embed=new_embed, bible=new, to_embed=False),
+
+    return new_embed
 
 
 def get_verse(bible, gospel, group, start, end):
@@ -101,6 +112,8 @@ def parse_verse(query):
         return actions.EMBED, get_help()
     if re.match(r"^\s*/verse\s+old\s*", query):
         return actions.EMBED, get_old()
+    if re.match(r"^\s*/verse\s+new\s*", query):
+        return actions.EMBED, get_new()
     tokenized = re.findall(r"/verse\s+([a-z0-9]{1,10})\s+(\d{1,3})[.:](\d{1,3})(-\d{0,3})?\s*$", query)
     for gospel, group, start, end in tokenized:
         end = end[1:]
