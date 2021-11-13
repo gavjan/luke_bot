@@ -35,6 +35,7 @@ def main():
             elif action == actions.ERR:
                 await message.reply(embed=response)
             elif action == actions.EMBED:
+                print(response)
                 await message.channel.send(embed=response)
             elif action == actions.EXIT:
                 await message.reply(response)
