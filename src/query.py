@@ -42,10 +42,8 @@ def get_help():
     desc = "example:```/verse tes2 2.9-11```\n"
     desc += "To get the list of New Testament aliases type ```/verse new```\n"
     desc += "To get the list of Old Testament aliases type ```/verse old```\n"
-    help_embed = discord.Embed(title=title, description=desc, color=discord.Color.green())
-    # help_embed = add_keys(embed=help_embed, bible=new, to_embed=True)
 
-    return help_embed
+    return discord.Embed(title=title, description=desc, color=discord.Color.green())
 
 
 def get_old():
@@ -67,7 +65,7 @@ def get_new():
             title="New Testament Aliases",
             color=discord.Color.green()
         )
-        new_embed = add_keys(embed=new_embed, bible=new, to_embed=False),
+        new_embed = add_keys(embed=new_embed, bible=new, to_embed=True),
 
     return new_embed
 
