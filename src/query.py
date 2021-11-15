@@ -15,9 +15,9 @@ def add_keys(embed, bible, to_embed=True):
     gosp = {}
     for gospel in sorted(bible):
         if has_numbers(gospel):
-            gosp[gospel[:-1]] = {}
-            gosp[gospel[:-1]]["name"] = bible[gospel]["name"][:-1]
-            gosp[gospel[:-1]]["end"] = int(gospel[-1:])
+            gosp[gospel[1:]] = {}
+            gosp[gospel[1:]]["name"] = bible[gospel]["name"][1:]
+            gosp[gospel[1:]]["end"] = int(gospel[:1])
         else:
             gosp[gospel] = {}
             gosp[gospel]["name"] = bible[gospel]["name"]
@@ -27,8 +27,8 @@ def add_keys(embed, bible, to_embed=True):
         name = key
         value = gosp[key]["name"]
         if gosp[key]["end"] != 0:
-            name += f'[1-{gosp[key]["end"]}]'
-            value += f' [1-{gosp[key]["end"]}]'
+            name = f'[1-{gosp[key]["end"]}]{name}'
+            value = f'[1-{gosp[key]["end"]}] {value}'
         if to_embed:
             embed.add_field(name=name, value=value, inline=True)
         else:
@@ -39,7 +39,7 @@ def add_keys(embed, bible, to_embed=True):
 
 def get_help():
     title = "*/verse [gospel_alias] [section].[start]-[end]*"
-    desc = "example:```/verse tes2 2.9-11```\n"
+    desc = "example:```/verse 2tes 2.9-11```\n"
     desc += "To get the list of New Testament aliases type ```/verse new```\n"
     desc += "To get the list of Old Testament aliases type ```/verse old```\n"
 
