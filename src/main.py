@@ -39,6 +39,7 @@ def main():
             elif action == actions.DM:
                 await message.author.send(embed=response)
                 await message.add_reaction("🇩")
+                await message.add_reaction("🇲")
             elif action == actions.EXIT:
                 await message.reply(response)
                 exit(0)
