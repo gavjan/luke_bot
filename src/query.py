@@ -109,7 +109,7 @@ def parse_verse(query):
     if re.match(r"^\s*/verse\s+old\s*$", query):
         return actions.DM, get_old()
     if re.match(r"^\s*/verse\s+new\s*$", query):
-        return actions.EMBED, get_new()
+        return actions.DM, get_new()
     tokenized = re.findall(r"/verse\s+([a-z0-9]{1,10})\s+(\d{1,3})[.:](\d{1,3})(-\d{0,3})?\s*$", query)
     for gospel, group, start, end in tokenized:
         end = end[1:]

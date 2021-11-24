@@ -37,7 +37,7 @@ def main():
             elif action == actions.EMBED:
                 await message.channel.send(embed=response)
             elif action == actions.DM:
-                await message.author.send(response)
+                await message.author.send(embed=response)
             elif action == actions.EXIT:
                 await message.reply(response)
                 exit(0)
