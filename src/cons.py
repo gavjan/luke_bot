@@ -18,6 +18,7 @@ class actions(enum.Enum):
     IGNORE = 4
     EMBED = 5
     EXIT = 6
+    DM = 7
 
 
 def getenv(name):
