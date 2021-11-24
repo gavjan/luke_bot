@@ -104,14 +104,11 @@ new = load_json("new_bible")
 def parse_verse(query):
     err = ""
 
-    if re.match(r"^\s*/verse\s*$", query):
-        return random_verse()
-
-    if re.match(r"^\s*/verse\s+help\s*", query):
+    if re.match(r"^\s*/verse\s+help\s$*", query):
         return actions.EMBED, get_help()
-    if re.match(r"^\s*/verse\s+old\s*", query):
-        return actions.EMBED, get_old()
-    if re.match(r"^\s*/verse\s+new\s*", query):
+    if re.match(r"^\s*/verse\s+old\s*$", query):
+        return actions.DM, get_old()
+    if re.match(r"^\s*/verse\s+new\s*$", query):
         return actions.EMBED, get_new()
     tokenized = re.findall(r"/verse\s+([a-z0-9]{1,10})\s+(\d{1,3})[.:](\d{1,3})(-\d{0,3})?\s*$", query)
     for gospel, group, start, end in tokenized:
@@ -176,13 +173,17 @@ def daily_verse():
 
 def parse_query(query, debug=False):
     content = query if debug else query.content
-    if re.match(r"^\s*/test_holiday\s*", content) and query.author.id == ADMIN_ID:
+    if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
+        return actions.DM, "hello"
+    if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
         return todays_holiday()
-    if re.match(r"^\s*/verse\s*", content):
+    if re.match(r"^\s*/verse\s*$", content):
+        return random_verse()
+    if re.match(r"^\s*/verse\s+", content):
         return parse_verse(content)
     if re.search(r"\b(amen|ամեն)\b", content, re.IGNORECASE):
         return actions.REPLY, "Ամեն :pray:"
-    if re.match(r"^s*/restart_luke\s*", content) and query.author.id == ADMIN_ID:
+    if re.match(r"^s*/restart_luke\s*$", content) and query.author.id == ADMIN_ID:
         return actions.EXIT, "ok"
 
     return actions.IGNORE, ""
