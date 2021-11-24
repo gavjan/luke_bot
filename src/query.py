@@ -104,7 +104,7 @@ new = load_json("new_bible")
 def parse_verse(query):
     err = ""
 
-    if re.match(r"^\s*/verse\s+help\s$*", query):
+    if re.match(r"^\s*/verse\s+help\s*$", query):
         return actions.EMBED, get_help()
     if re.match(r"^\s*/verse\s+old\s*$", query):
         return actions.DM, get_old()
@@ -173,7 +173,7 @@ def daily_verse():
 
 def parse_query(query, debug=False):
     content = query if debug else query.content
-    if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
+    if re.match(r"^\s*/test_dm\s*$", content) and query.author.id == ADMIN_ID:
         return actions.DM, "hello"
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
         return todays_holiday()
