@@ -38,6 +38,7 @@ def main():
                 await message.channel.send(embed=response)
             elif action == actions.DM:
                 await message.author.send(embed=response)
+                await message.add_reaction("🇩")
             elif action == actions.EXIT:
                 await message.reply(response)
                 exit(0)
