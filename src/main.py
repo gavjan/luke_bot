@@ -4,6 +4,7 @@ from datetime import datetime, time, timedelta
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils.manage_commands import create_option
 from discord.ext import commands
+from discord.utils import get
 import asyncio
 import discord
 
@@ -40,6 +41,10 @@ def main():
                 await message.author.send(embed=response)
                 await message.add_reaction("🇩")
                 await message.add_reaction("🇲")
+            elif action == actions.REACT:
+                for emoji_id in response:
+                    emoji = get(client.emojis, name=emoji_id)
+                    await message.add_reaction(emoji or emoji_id)
             elif action == actions.EXIT:
                 await message.reply(response)
                 exit(0)
