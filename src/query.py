@@ -181,6 +181,10 @@ def parse_query(query, debug=False):
         return parse_verse(content)
     if re.search(r"\b(amen|ամեն)\b", content, re.IGNORECASE):
         return actions.REPLY, "Ամեն :pray:"
+    if re.search(r"\b(gm|գմ)\b", content, re.IGNORECASE):
+        return actions.REACT, ["🇬", "🇲", "baj"]
+    if re.search(r"\b(gn|գն)\b", content, re.IGNORECASE):
+        return actions.REACT, ["🇬", "🇳", "gandz"]
     if re.match(r"^s*/restart_luke\s*$", content) and query.author.id == ADMIN_ID:
         return actions.EXIT, "ok"
 

@@ -19,6 +19,7 @@ class actions(enum.Enum):
     EMBED = 5
     EXIT = 6
     DM = 7
+    REACT = 8
 
 
 def getenv(name):
