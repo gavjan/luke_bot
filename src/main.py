@@ -8,6 +8,7 @@ from discord.utils import get
 import asyncio
 import discord
 
+
 def main():
     # client = discord.Client()
     WHEN_VERSE = time(16, 0, 0)  # 4:00 PM UTC
