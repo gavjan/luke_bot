@@ -7,10 +7,8 @@ from discord.ext import commands
 from discord.utils import get
 import asyncio
 import discord
-import subprocess
 
 def main():
-    subprocess.call(["pip3", "install", "git+https://github.com/Rapptz/discord.py"])
     # client = discord.Client()
     WHEN_VERSE = time(16, 0, 0)  # 4:00 PM UTC
     WHEN_HOLIDAY = time(4, 0, 0)  # 4:00 AM UTC
@@ -26,7 +24,6 @@ def main():
 
     @client.event
     async def on_message(message):
-        print(message)
         try:
             if message.author == client.user:
                 return
