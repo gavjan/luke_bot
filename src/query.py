@@ -179,26 +179,16 @@ def parse_query(query, debug=False):
         return random_verse()
     if re.match(r"^\s*/verse\s+", content):
         return parse_verse(content)
-    if re.search(r"\b(amen|ամեն)\b", content, re.IGNORECASE):
-        return actions.REPLY, "Ամեն :pray:"
     if re.search(r"\b(gm|գմ)\b", content, re.IGNORECASE):
         return actions.REACT, ["🇬", "🇲", "baj"]
     if re.search(r"\b(gn|գն)\b", content, re.IGNORECASE):
         return actions.REACT, ["🇬", "🇳", "gandz"]
+    if re.search(r"\b(amen|ամեն)\b", content, re.IGNORECASE):
+        return actions.REPLY, "Ամեն :pray:"
     if re.match(r"^s*/restart_luke\s*$", content) and query.author.id == ADMIN_ID:
         return actions.EXIT, "ok"
 
-    return actions.IGNORE, ""
-
-
-def main():
-    print("/verse [gospel] [section]․[start]-[end]")
-    while True:
-        action, response = parse_query(input(), debug=True)
-        if action == action.SEND or action.REPLY:
-            print(response)
-        else:
-            eprint(response)
+    return actions.IGNORE, None
 
 
 def todays_holiday():
@@ -218,6 +208,16 @@ def todays_holiday():
     embed.set_author(name=today)
     embed.description += f"\n[Ավելին]({url})"
     return actions.EMBED, embed
+
+
+def main():
+    print("/verse [gospel] [section]․[start]-[end]")
+    while True:
+        action, response = parse_query(input(), debug=True)
+        if action == action.SEND or action.REPLY:
+            print(response)
+        else:
+            eprint(response)
 
 
 if __name__ == "__main__":
