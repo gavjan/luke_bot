@@ -49,6 +49,9 @@ def main():
                 await message.reply(response)
                 exit(0)
         except Exception as e:
+            if e.code == PERM_ERR_CODE:
+                return
+
             err_exit(e)
 
     async def daily_verse_task():
