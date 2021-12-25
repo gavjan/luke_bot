@@ -9,6 +9,7 @@ from urllib.parse import quote
 ADMIN_ID = 213341816324489217
 START_DATE = "2021-10-24"
 SEED = "LUKE"
+PERM_ERR_CODE = 50013
 
 
 class actions(enum.Enum):
