@@ -9,7 +9,15 @@ from urllib.parse import quote
 ADMIN_ID = 213341816324489217
 START_DATE = "2021-10-24"
 SEED = "LUKE"
-PERM_ERR_CODE = 50013
+
+
+class ignore_errors(enum.Enum):
+    PERM_ERR_CODE = 50013
+    DM_ERR = 50007
+
+    @classmethod
+    def has(cls, value):
+        return value in [item.value for item in cls]
 
 
 class actions(enum.Enum):
@@ -117,7 +125,8 @@ def load_page(url, attempt=1):
             if not is_ascii(x):
                 url = url.sub(x, quote(x))
 
-    req = Request(url, headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'})
+    req = Request(url, headers={
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'})
     try:
         web_byte = urlopen(req).read()
     except:

@@ -49,7 +49,7 @@ def main():
                 await message.reply(response)
                 exit(0)
         except Exception as e:
-            if e.code == PERM_ERR_CODE:
+            if ignore_errors.has(e.code):
                 return
 
             err_exit(e)
