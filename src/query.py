@@ -191,23 +191,31 @@ def parse_query(query, debug=False):
     return actions.IGNORE, None
 
 
-def todays_holiday():
-    date.today()
-    url = f"http://www.qahana.am/am/holidays/{date.today()}/1"
+def holiday_on(_date):
+    url = f"http://www.qahana.am/am/holidays/{_date}/1"
     page = load_page(url)
 
     holiday_div = page.find("div", {"class": "holidayBox"})
     if not holiday_div:
         print("No Holiday today")
         return actions.IGNORE, ""
+
     today = re.sub(r"</?span.*?>", "", str(holiday_div.span)).strip()
     title = re.sub(r"</?h2.*?>", "", str(holiday_div.h2)).strip()
-    desc = re.sub(r"</?p.*?>", "", str(holiday_div.p)).strip()
+    desc = re.sub(r"<strong>.*?</strong>", "", str(holiday_div.div.div))
+    desc = re.sub(r"</?(div|strong|p)>", "", desc)
+    desc = re.sub(r"</?(font|p).*?>", "", desc)
+    desc = desc.replace("`", "\\`")
+    desc = desc.strip().splitlines()[0]
 
     embed = discord.Embed(title=title, url=url, description=desc, color=discord.Color.blue())
     embed.set_author(name=today)
     embed.description += f"\n[Ավելին]({url})"
     return actions.EMBED, embed
+
+
+def todays_holiday():
+    return holiday_on(date.today())
 
 
 def main():
