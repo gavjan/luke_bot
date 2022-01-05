@@ -171,6 +171,14 @@ def daily_verse():
     return embed
 
 
+def zatik_reply():
+    t = date.today()
+    if (t.day, t.month) in [(5, 1), (6, 1)]:
+        return actions.REPLY, "Ձեզ և մեզ մեծ Ավետիս"
+    else:
+        return actions.IGNORE, None
+
+
 def parse_query(query, debug=False):
     content = query if debug else query.content
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
@@ -185,6 +193,9 @@ def parse_query(query, debug=False):
         return actions.REACT, ["🇬", "🇳", "gandz"]
     if re.search(r"\b(amen|ամեն)\b", content, re.IGNORECASE):
         return actions.REPLY, "Ամեն :pray:"
+    if re.search(r"\b(qristos|քրիստոս)\s+(ծնվեց|tsnvec|cnvec|ծնավ|tsnav|cnav)\s*(և|ev|եւ)\s+(հայտնեցավ|haytnecav)\b",
+                 content, re.IGNORECASE):
+        return zatik_reply()
     if re.match(r"^s*/restart_luke\s*$", content) and query.author.id == ADMIN_ID:
         return actions.EXIT, "ok"
 
