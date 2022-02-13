@@ -8,6 +8,7 @@ from discord.utils import get
 import asyncio
 import discord
 
+
 def main():
     # client = discord.Client()
     WHEN_VERSE = time(16, 0, 0)  # 4:00 PM UTC
@@ -56,7 +57,8 @@ def main():
     async def daily_verse_task():
         await client.wait_until_ready()
         channel = client.get_channel(default_channel_id)
-        await channel.send(embed=daily_verse())
+        action, response = daily_verse()
+        await channel.send(embed=response)
 
     async def daily_holiday_task():
         await client.wait_until_ready()
