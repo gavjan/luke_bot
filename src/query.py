@@ -168,7 +168,7 @@ def daily_verse():
         err_exit(f"{gospel} is neither in old nor in new bible wtf???")
     action, embed = get_verse(bible, gospel, section, verse, verse)
     embed.title = "Այսօրվա համար՝ " + embed.title
-    return embed
+    return actions.EMBED, embed
 
 
 def zatik_reply():
@@ -183,6 +183,8 @@ def parse_query(query, debug=False):
     content = query if debug else query.content
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
         return todays_holiday()
+    if re.match(r"^\s*/test_verse\s*$", content) and query.author.id == ADMIN_ID:
+        return daily_verse()
     if re.match(r"^\s*/verse\s*$", content):
         return random_verse()
     if re.match(r"^\s*/verse\s+", content):
