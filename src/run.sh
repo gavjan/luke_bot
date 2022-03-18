@@ -12,7 +12,7 @@ send_mail() {
   -H "X-Postmark-Server-Token: $(cat ../.env/mail_token.env)" \
   -d "{
   \"From\": \"$(cat ../.env/mail.env)\",
-  \"To\": \"$(cat cat ../.env/mail.env)\",
+  \"To\": \"$(cat ../.env/mail.env)\",
   \"Subject\": \"[Luke] Bot Error\",
   \"TextBody\": \"$(cat .err_file)\",
   \"MessageStream\": \"outbound\"
