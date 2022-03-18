@@ -14,6 +14,7 @@ SEED = "LUKE"
 class ignore_errors(enum.Enum):
     PERM_ERR_CODE = 50013
     DM_ERR = 50007
+    OS_ERR = 5
 
     @classmethod
     def has(cls, value):
