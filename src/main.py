@@ -10,9 +10,8 @@ import discord
 
 
 def main():
-    # client = discord.Client()
-    WHEN_VERSE = time(16, 0, 0)  # 4:00 PM UTC
-    WHEN_HOLIDAY = time(4, 0, 0)  # 4:00 AM UTC
+    WHEN_VERSE = time(16, 0, 0)  # 4 PM UTC
+    WHEN_HOLIDAY = time(4, 0, 0)  # 4 AM UTC
     default_channel_id = 456178384016244738
 
     client = commands.Bot(command_prefix="!")
