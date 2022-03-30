@@ -1,4 +1,4 @@
-from cons import load_json, actions, eprint, ADMIN_ID, SEED, START_DATE, err_exit, load_page, rm_message
+from cons import load_json, actions, ADMIN_ID, SEED, START_DATE, err_exit, load_page, rm_message
 from datetime import date, datetime
 import re
 import discord
@@ -197,7 +197,12 @@ async def process_reaction(client, players, payload):
     del players[k]
 
     drawn = random.choice(["ghush", "gir"])
-    name = payload.member.nick or payload.member.name
+    nick = None
+    if not payload.member:
+        nick = await client.fetch_user(payload.user_id)
+        nick = nick.name
+
+    name = nick or payload.member.nick or payload.member.name
     pick_txt = ["Ղուշ", "Գիր"][pick == "gir"]
     if pick == drawn:
         text = f"Ապրես {name} դու ճշտաբար ընտրեցիր *{pick_txt}*"
@@ -249,7 +254,7 @@ def parse_query(query, debug=False):
 
 
 def holiday_on(_date):
-    url = f"http://www.qahana.am/am/holidays/{_date}/1"
+    url = f"https://www.qahana.am/am/holidays/{_date}/1"
     page = load_page(url)
 
     holiday_div = page.find("div", {"class": "holidayBox"})
@@ -273,17 +278,3 @@ def holiday_on(_date):
 
 def todays_holiday():
     return holiday_on(date.today())
-
-
-def main():
-    print("/verse [gospel] [section]․[start]-[end]")
-    while True:
-        action, response = parse_query(input(), debug=True)
-        if action == action.SEND or action.REPLY:
-            print(response)
-        else:
-            eprint(response)
-
-
-if __name__ == "__main__":
-    main()
