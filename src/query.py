@@ -1,7 +1,8 @@
-from cons import load_json, actions, eprint, ADMIN_ID, SEED, START_DATE, err_exit, load_page, print_json
+from cons import load_json, actions, eprint, ADMIN_ID, SEED, START_DATE, err_exit, load_page, rm_message
 from datetime import date, datetime
 import re
 import discord
+from discord.utils import get
 import random
 
 new_embed = None
@@ -179,6 +180,49 @@ def zatik_reply():
         return actions.IGNORE, None
 
 
+async def process_reaction(client, players, payload):
+    k = (payload.channel_id, payload.message_id)
+
+    if k not in players:
+
+        return
+
+    pick = payload.emoji.name
+    if pick not in ["ghush", "gir"]:
+        return
+
+    if players[k][0] != payload.user_id:
+        return
+
+    await rm_message(client, k[0], k[1])
+    original_message = await client.get_channel(k[0]).fetch_message(players[k][1])
+    del players[k]
+
+    drawn = random.choice(["ghush", "gir"])
+    name = payload.member.nick or payload.member.name
+    pick_txt = ["Ղուշ", "Գիր"][pick == "gir"]
+    if pick == drawn:
+        text = f"Ապրես {name} դու ճշտաբար ընտրեցիր *{pick_txt}*"
+        color = discord.Color.green()
+    else:
+        text = f"Ափսոս {name} դու թյուրաբար ընտրեցիր *{pick_txt}*"
+        color = discord.Color.red()
+
+    embed = discord.Embed(description=text, color=color)
+
+    link = ["https://i.imgur.com/gLT4OND.gif", "https://i.imgur.com/hdJynZe.gif"][drawn == "gir"]
+    embed.set_image(url=link)
+    await original_message.reply(embed=embed)
+
+
+def banned_word():
+    desc = "Դուք օգտագործեցիք արգելված բառ։ \n" \
+           "Ըստ ԿՈՒՂԲ≈ † =∞ ֊ի սահմանադրության, դուք պետք է պարգևատրվեք կամ պատժեք։\n" \
+           "Ընտրեք Ղուշ կամ Գիր սկսելու համար\nԱստված ձեզ հետ։\nԱմեն🙏"
+    color = discord.Color.blue()
+    return actions.BUTTONS, {"emojis": ["ghush", "gir"], "embed": discord.Embed(description=desc, color=color)}
+
+
 def parse_query(query, debug=False):
     content = query if debug else query.content
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
@@ -198,6 +242,8 @@ def parse_query(query, debug=False):
     if re.search(r"\b(qristos|քրիստոս)\s+(ծնվեց|tsnvec|cnvec|ծնավ|tsnav|cnav)\s*(և|ev|եւ)\s+(հայտնեցավ|haytnecav)\b",
                  content, re.IGNORECASE):
         return zatik_reply()
+    if re.search(r"\b(nigger|նիգգեռ)\b", content, re.IGNORECASE):
+        return banned_word()
     if re.match(r"^s*/restart_luke\s*$", content) and query.author.id == ADMIN_ID:
         return actions.EXIT, "ok"
 
