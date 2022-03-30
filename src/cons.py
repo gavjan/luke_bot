@@ -30,6 +30,7 @@ class actions(enum.Enum):
     EXIT = 6
     DM = 7
     REACT = 8
+    BUTTONS = 9
 
 
 def getenv(name):
@@ -136,3 +137,20 @@ def load_page(url, attempt=1):
     webpage = web_byte.decode('utf-8')
     page = soup(webpage, "html.parser")
     return page
+
+
+def to_remove_vals(m, val):
+    ret = []
+    to_del = []
+    for k, v in m.items():
+        if v[0] == val:
+            to_del.append(k)
+            ret.append(k)
+    for x in to_del:
+        del m[x]
+
+    return ret
+
+async def rm_message(client, channel_id, message_id):
+    msg = await client.get_channel(channel_id).fetch_message(message_id)
+    await msg.delete()
