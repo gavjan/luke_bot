@@ -2,7 +2,6 @@ from cons import load_json, actions, eprint, ADMIN_ID, SEED, START_DATE, err_exi
 from datetime import date, datetime
 import re
 import discord
-from discord.utils import get
 import random
 
 new_embed = None
@@ -184,7 +183,6 @@ async def process_reaction(client, players, payload):
     k = (payload.channel_id, payload.message_id)
 
     if k not in players:
-
         return
 
     pick = payload.emoji.name
