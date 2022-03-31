@@ -8,12 +8,8 @@ from discord.utils import get
 import asyncio
 import discord
 
-import subprocess
-
 
 def main():
-    subprocess.call(["pip3", "install", "git+https://github.com/Rapptz/discord.py@feature/threads"])
-
     WHEN_VERSE = time(16, 0, 0)  # 4 PM UTC
     WHEN_HOLIDAY = time(4, 0, 0)  # 4 AM UTC
     default_channel_id = 456178384016244738
