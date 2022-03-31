@@ -10,9 +10,8 @@ import discord
 
 import subprocess
 
+
 def main():
-    subprocess.call(["pip3", "uninstall", "discord"])
-    subprocess.call(["pip3", "uninstall", "discord.py"])
     subprocess.call(["pip3", "install", "git+https://github.com/Rapptz/discord.py@feature/threads"])
 
     WHEN_VERSE = time(16, 0, 0)  # 4 PM UTC
