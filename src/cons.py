@@ -151,6 +151,7 @@ def to_remove_vals(m, val):
 
     return ret
 
+
 async def rm_message(client, channel_id, message_id):
     msg = await client.get_channel(channel_id).fetch_message(message_id)
     await msg.delete()

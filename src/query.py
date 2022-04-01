@@ -185,6 +185,8 @@ async def process_reaction(client, players, payload):
     if k not in players:
         return
 
+    if not payload.member:
+        return
     pick = payload.emoji.name
     if pick not in ["ghush", "gir"]:
         return
@@ -197,12 +199,7 @@ async def process_reaction(client, players, payload):
     del players[k]
 
     drawn = random.choice(["ghush", "gir"])
-    nick = None
-    if not payload.member:
-        nick = await client.fetch_user(payload.user_id)
-        nick = nick.name
-
-    name = nick or payload.member.nick or payload.member.name
+    name = payload.member.nick or payload.member.name
     pick_txt = ["Ղուշ", "Գիր"][pick == "gir"]
     if pick == drawn:
         text = f"Ապրես {name} դու ճշտաբար ընտրեցիր *{pick_txt}*"
@@ -218,7 +215,10 @@ async def process_reaction(client, players, payload):
     await original_message.reply(embed=embed)
 
 
-def banned_word():
+def banned_word(query):
+    if query.channel.type == discord.ChannelType.private:
+        return actions.IGNORE, None
+
     desc = "Դուք օգտագործեցիք արգելված բառ։ \n" \
            "Ըստ ԿՈՒՂԲ≈ † =∞ ֊ի սահմանադրության, դուք պետք է պարգևատրվեք կամ պատժեք։\n" \
            "Ընտրեք Ղուշ կամ Գիր սկսելու համար։\nԱստված ձեզ հետ։\nԱմեն🙏"
@@ -246,7 +246,7 @@ def parse_query(query, debug=False):
                  content, re.IGNORECASE):
         return zatik_reply()
     if re.search(r"\b(nigger|նիգգեռ)\b", content, re.IGNORECASE):
-        return banned_word()
+        return banned_word(query)
     if re.match(r"^s*/restart_luke\s*$", content) and query.author.id == ADMIN_ID:
         return actions.EXIT, "ok"
 
