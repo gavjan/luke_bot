@@ -236,9 +236,9 @@ def parse_query(query, debug=False):
         return random_verse()
     if re.match(r"^\s*/verse\s+", content):
         return parse_verse(content)
-    if re.search(r"\b(gm|գմ)\b", content, re.IGNORECASE):
+    if re.search(r"(\W|_|\d|^)(gm|գմ)(\W|_|\d|$)", content, flags=re.UNICODE|re.IGNORECASE):
         return actions.REACT, ["🇬", "🇲", "baj"]
-    if re.search(r"\b(gn|գն)\b", content, re.IGNORECASE):
+    if re.search(r"(\W|_|\d|^)(gn|գն|bg|բգ)(\W|_|\d|$)", content, flags=re.UNICODE|re.IGNORECASE):
         return actions.REACT, ["🇬", "🇳", "gandz"]
     if re.search(r"\b(amen|ամեն)\b", content, re.IGNORECASE):
         return actions.REPLY, "Ամեն :pray:"
