@@ -216,7 +216,7 @@ async def process_reaction(client, players, payload):
 
 
 def banned_word(query):
-    if query.channel.type == discord.ChannelType.private:
+    if type(query.channel) == discord.channel.DMChannel:
         return actions.IGNORE, None
 
     desc = "Դուք օգտագործեցիք արգելված բառ։ \n" \
