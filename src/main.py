@@ -33,36 +33,36 @@ def main():
         try:
             if message.author == client.user:
                 return
-            action, response = parse_query(message)
-            if action == actions.SEND:
-                await message.channel.send(response)
-            elif action == actions.REPLY:
-                await message.reply(response)
-            elif action == actions.ERR:
-                await message.reply(embed=response)
-            elif action == actions.EMBED:
-                await message.channel.send(embed=response)
-            elif action == actions.DM:
-                await message.author.send(embed=response)
-                await message.add_reaction("🇩")
-                await message.add_reaction("🇲")
-            elif action == actions.REACT:
-                for emoji_id in response:
-                    emoji = get(client.emojis, name=emoji_id)
-                    await message.add_reaction(emoji or emoji_id)
-            elif action == actions.BUTTONS:
-                sent = await message.reply(embed=response["embed"])
-                for k in to_remove_vals(players, message.author.id):
-                    await rm_message(client, k[0], k[1])
+            for action, response in parse_query(message):
+                if action == actions.SEND:
+                    await message.channel.send(response)
+                elif action == actions.REPLY:
+                    await message.reply(response)
+                elif action == actions.ERR:
+                    await message.reply(embed=response)
+                elif action == actions.EMBED:
+                    await message.channel.send(embed=response)
+                elif action == actions.DM:
+                    await message.author.send(embed=response)
+                    await message.add_reaction("🇩")
+                    await message.add_reaction("🇲")
+                elif action == actions.REACT:
+                    for emoji_id in response:
+                        emoji = get(client.emojis, name=emoji_id)
+                        await message.add_reaction(emoji or emoji_id)
+                elif action == actions.BUTTONS:
+                    sent = await message.reply(embed=response["embed"])
+                    for k in to_remove_vals(players, message.author.id):
+                        await rm_message(client, k[0], k[1])
 
-                players[(sent.channel.id, sent.id)] = (message.author.id, message.id)
-                for emoji_id in response["emojis"]:
-                    emoji = get(client.emojis, name=emoji_id)
-                    await sent.add_reaction(emoji or emoji_id)
+                    players[(sent.channel.id, sent.id)] = (message.author.id, message.id)
+                    for emoji_id in response["emojis"]:
+                        emoji = get(client.emojis, name=emoji_id)
+                        await sent.add_reaction(emoji or emoji_id)
 
-            elif action == actions.EXIT:
-                await message.reply(response)
-                exit(0)
+                elif action == actions.EXIT:
+                    await message.reply(response)
+                    exit(0)
         except Exception as e:
             if ignore_errors.has(e.code):
                 return

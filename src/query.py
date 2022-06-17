@@ -228,29 +228,30 @@ def banned_word(query):
 
 def parse_query(query, debug=False):
     content = query if debug else query.content
+    ret = []
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
-        return todays_holiday()
+        ret.append((todays_holiday()))
     if re.match(r"^\s*/test_verse\s*$", content) and query.author.id == ADMIN_ID:
-        return daily_verse()
+        ret.append((daily_verse()))
     if re.match(r"^\s*/verse\s*$", content):
-        return random_verse()
+        ret.append((random_verse()))
     if re.match(r"^\s*/verse\s+", content):
-        return parse_verse(content)
-    if re.search(r"(\W|_|\d|^)(gm|գմ)(\W|_|\d|$)", content, flags=re.UNICODE|re.IGNORECASE):
-        return actions.REACT, ["🇬", "🇲", "baj"]
-    if re.search(r"(\W|_|\d|^)(gn|գն|bg|բգ)(\W|_|\d|$)", content, flags=re.UNICODE|re.IGNORECASE):
-        return actions.REACT, ["🇬", "🇳", "gandz"]
+        ret.append((parse_verse(content)))
     if re.search(r"\b(amen|ամեն)\b", content, re.IGNORECASE):
-        return actions.REPLY, "Ամեն :pray:"
+        ret.append((actions.REPLY, "Ամեն :pray:"))
     if re.search(r"\b(qristos|քրիստոս)\s+(ծնվեց|tsnvec|cnvec|ծնավ|tsnav|cnav)\s*(և|ev|եւ)\s+(հայտնեցավ|haytnecav)\b",
                  content, re.IGNORECASE):
-        return zatik_reply()
+        ret.append((zatik_reply()))
     if re.search(r"\b(nigger|նիգգեռ)\b", content, re.IGNORECASE):
-        return banned_word(query)
+        ret.append((banned_word(query)))
+    if re.search(r"(\W|_|\d|^)(gm|գմ)(\W|_|\d|$)", content, flags=re.UNICODE|re.IGNORECASE):
+        ret.append((actions.REACT, ["🇬", "🇲", "baj"]))
+    elif re.search(r"(\W|_|\d|^)(gn|գն|bg|բգ)(\W|_|\d|$)", content, flags=re.UNICODE|re.IGNORECASE):
+        ret.append((actions.REACT, ["🇬", "🇳", "gandz"]))
     if re.match(r"^s*/restart_luke\s*$", content) and query.author.id == ADMIN_ID:
-        return actions.EXIT, "ok"
+        ret.append((actions.EXIT, "ok"))
 
-    return actions.IGNORE, None
+    return ret
 
 
 def holiday_on(_date):
