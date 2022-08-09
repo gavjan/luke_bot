@@ -1,5 +1,7 @@
 from cons import load_json, actions, ADMIN_ID, SEED, COUNT_ID, START_DATE, err_exit, load_page, rm_message
 from datetime import date, datetime
+from itertools import groupby
+
 import re
 import discord
 import random
@@ -236,7 +238,7 @@ def assert_count(txt, author):
 
         return (actions.REACT, ["♻️"])
 
-    nums = [int(s) for s in txt.split() if s.isdigit()]
+    nums = [int(''.join(i)) for is_digit, i in groupby(txt, str.isdigit) if is_digit]
     if (counter[0]+1) not in nums or author == counter[1]:
         return (actions.REPLY, f"😡 {counter}")
     counter = (counter[0] + 1, author)
