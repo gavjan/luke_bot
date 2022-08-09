@@ -6,6 +6,7 @@ import random
 
 new_embed = None
 old_embed = None
+counter = None
 
 
 def add_keys(embed, bible, to_embed=True):
@@ -225,12 +226,27 @@ def banned_word(query):
     color = discord.Color.blue()
     return actions.BUTTONS, {"emojis": ["ghush", "gir"], "embed": discord.Embed(description=desc, color=color)}
 
+def assert_count(txt):
+    if not counter:
+        num = re.match(r"^\d+")
+        if not num:
+            return (actions.REACT, ["❓"]) 
+        counter = int(num[0])
+
+        return (actions.REACT, ["♻️"])
+
+    
+    nums = [int(s) for s in txt.split() if s.isdigit()]
+    if (counter+1) not in nums:
+        return (actions.REACT, [":hrrrr:"])
+
+    
 
 def parse_query(query, debug=False):
     content = query if debug else query.content
     ret = []
-    if query.channel.id == COUNT_ID and query.author.id == ADMIN_ID:
-        ret.append((actions.REACT, ["🇬"]))
+    if query.channel.id == COUNT_ID:
+        ret.append(assert_count(content))
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
         ret.append((todays_holiday()))
     if re.match(r"^\s*/test_verse\s*$", content) and query.author.id == ADMIN_ID:
