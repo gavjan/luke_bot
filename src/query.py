@@ -249,7 +249,6 @@ def parse_query(query, debug=False):
     ret = []
     if query.channel.id == COUNT_ID:
         ret.append((actions.REACT, ["gandz"]))
-        ret.append(assert_count(content))
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
         ret.append((todays_holiday()))
     if re.match(r"^\s*/test_verse\s*$", content) and query.author.id == ADMIN_ID:
