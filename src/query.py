@@ -247,8 +247,8 @@ def assert_count(txt):
 def parse_query(query, debug=False):
     content = query if debug else query.content
     ret = []
-    if query.channel.id == 1002183766682390539:
-        ret.append((actions.REACT, ["hrrrr"]))
+    if query.channel.id == COUNT_ID:
+        ret.append((actions.REACT, ["gandz"]))
         ret.append(assert_count(content))
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
         ret.append((todays_holiday()))
