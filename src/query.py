@@ -227,7 +227,6 @@ def banned_word(query):
     return actions.BUTTONS, {"emojis": ["ghush", "gir"], "embed": discord.Embed(description=desc, color=color)}
 
 def assert_count(txt):
-    return (actions.REACT, ["kughb"])
 
     if not counter:
         num = re.match(r"^\d+", txt)
@@ -235,14 +234,14 @@ def assert_count(txt):
             return (actions.REACT, ["🇬"]) 
         counter = int(num[0])
 
-        return (actions.REACT, ["PinkDab"])
+        return (actions.REACT, ["kughb", "🇬"])
 
     
     nums = [int(s) for s in txt.split() if s.isdigit()]
     if (counter+1) not in nums:
-        return (actions.REACT, ["hrrrr"])
+        return (actions.REACT, ["🇬", "kughb"])
     counter+=1
-    return (actions.REACT, ["KughbDab"])
+    return (actions.REACT, ["kughb"])
 
     
 
