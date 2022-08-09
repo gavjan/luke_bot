@@ -236,7 +236,7 @@ def assert_count(txt):
 
         return (actions.REACT, ["kughb", "🇬"])
 
-    
+    return (actions.REPLY, "araaaaa")
     nums = [int(s) for s in txt.split() if s.isdigit()]
     if (counter+1) not in nums:
         return (actions.REACT, ["🇬", "kughb"])
