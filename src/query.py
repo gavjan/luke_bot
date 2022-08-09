@@ -238,9 +238,9 @@ def assert_count(txt, author):
 
     nums = [int(s) for s in txt.split() if s.isdigit()]
     if (counter[0]+1) not in nums or author == counter[1]:
-        return (actions.REACT, ["😡"])
+        return (actions.REPLY, f"😡 {counter}")
     counter = (counter[0] + 1, author)
-    return (actions.REPLY, f"{counter}")
+    return (actions.IGNORE, None)
 
     
 
