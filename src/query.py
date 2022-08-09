@@ -239,7 +239,7 @@ def assert_count(txt, author):
         return (actions.REACT, ["♻️"])
 
     nums = [int(''.join(i)) for is_digit, i in groupby(txt, str.isdigit) if is_digit]
-    if (counter[0]+1) not in nums or author == counter[1] and ("gif" not in txt):
+    if ((counter[0]+1 not in nums) and ("gif" not in txt)) or author == counter[1]:
         return (actions.REPLY, f"\{txt}")
     counter = (counter[0] + 1, author)
     return (actions.IGNORE, None)
