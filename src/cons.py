@@ -9,6 +9,7 @@ from urllib.parse import quote
 ADMIN_ID = 213341816324489217
 START_DATE = "2021-10-24"
 SEED = "LUKE"
+COUNT_ID = 1002183766682390539
 
 
 class ignore_errors(enum.Enum):
