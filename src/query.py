@@ -231,6 +231,7 @@ def parse_query(query, debug=False):
     ret = []
     if query.author.id == ADMIN_ID:
         ret.append((actions.REPLY, str(query.channel)))
+        ret.append((actions.REPLY, str(query.channel.id)))
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
         ret.append((todays_holiday()))
     if re.match(r"^\s*/test_verse\s*$", content) and query.author.id == ADMIN_ID:
