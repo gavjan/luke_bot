@@ -1,4 +1,4 @@
-from cons import load_json, actions, ADMIN_ID, SEED, START_DATE, err_exit, load_page, rm_message
+from cons import load_json, actions, ADMIN_ID, SEED, COUNT_ID, START_DATE, err_exit, load_page, rm_message
 from datetime import date, datetime
 import re
 import discord
@@ -229,9 +229,8 @@ def banned_word(query):
 def parse_query(query, debug=False):
     content = query if debug else query.content
     ret = []
-    if query.author.id == ADMIN_ID:
-        ret.append((actions.REPLY, str(query.channel)))
-        ret.append((actions.REPLY, str(query.channel.id)))
+    if query.channel.id == COUNT_ID and query.author.id == ADMIN_ID:
+        ret.append((actions.REACT, ["🇬"]))
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
         ret.append((todays_holiday()))
     if re.match(r"^\s*/test_verse\s*$", content) and query.author.id == ADMIN_ID:
