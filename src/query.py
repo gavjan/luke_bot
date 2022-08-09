@@ -234,13 +234,13 @@ def assert_count(txt, author):
             return (actions.REACT, ["❓"]) 
         counter = (int(num[0]), author)
 
-        return (actions.REACT, ["✅"])
+        return (actions.REACT, ["♻️"])
 
     nums = [int(s) for s in txt.split() if s.isdigit()]
     if (counter[0]+1) not in nums or author == counter[1]:
         return (actions.REACT, ["😡"])
     counter = (counter[0] + 1, author)
-    return (actions.IGNORE, None)
+    return (actions.REPLY, f"{counter}")
 
     
 
