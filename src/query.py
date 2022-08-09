@@ -230,15 +230,17 @@ def assert_count(txt):
     if not counter:
         num = re.match(r"^\d+")
         if not num:
-            return (actions.REACT, ["❓"]) 
+            return (actions.REACT, [":question:"]) 
         counter = int(num[0])
 
-        return (actions.REACT, ["♻️"])
+        return (actions.REACT, ["PinkDab"])
 
     
     nums = [int(s) for s in txt.split() if s.isdigit()]
     if (counter+1) not in nums:
         return (actions.REACT, [":hrrrr:"])
+    counter+=1
+    return (actions.REACT, [":KughbDab:"])
 
     
 
