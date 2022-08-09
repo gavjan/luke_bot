@@ -240,7 +240,7 @@ def assert_count(txt, author):
 
     nums = [int(''.join(i)) for is_digit, i in groupby(txt, str.isdigit) if is_digit]
     if (counter[0]+1) not in nums or author == counter[1]:
-        return (actions.REACT, ["😡"])
+        return (actions.REPLY, txt)
     counter = (counter[0] + 1, author)
     return (actions.IGNORE, None)
 
@@ -249,7 +249,7 @@ def assert_count(txt, author):
 def parse_query(query, debug=False):
     content = query if debug else query.content
     ret = []
-    if query.channel.id == COUNT_ID:
+    if query.channel.id == 839493198371356674:#COUNT_ID:
         ret.append(assert_count(content, query.author.id))
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
         ret.append((todays_holiday()))
