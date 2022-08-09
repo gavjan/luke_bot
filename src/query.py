@@ -229,8 +229,8 @@ def banned_word(query):
 def parse_query(query, debug=False):
     content = query if debug else query.content
     ret = []
-    if query.channel == 1002183766682390539:
-        ret.append((actions.REACT, ["✔️"]))
+    if query.author.id == ADMIN_ID:
+        ret.append((actions.REPLY, str(query.channel)))
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
         ret.append((todays_holiday()))
     if re.match(r"^\s*/test_verse\s*$", content) and query.author.id == ADMIN_ID:
