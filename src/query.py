@@ -231,16 +231,16 @@ def assert_count(txt):
     if not counter:
         num = re.match(r"^\d+", txt)
         if not num:
-            return (actions.REACT, ["🇬"]) 
+            return (actions.REACT, ["❓"]) 
         counter = int(num[0])
 
-        return (actions.REACT, ["kughb", "🇬"])
+        return (actions.REACT, ["✅"])
 
     nums = [int(s) for s in txt.split() if s.isdigit()]
     if (counter+1) not in nums:
-        return (actions.REACT, ["🇬", "kughb"])
+        return (actions.REACT, ["😡"])
     counter+=1
-    return (actions.REACT, ["kughb"])
+    return (actions.IGNORE, None)
 
     
 
