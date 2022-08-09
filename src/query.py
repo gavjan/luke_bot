@@ -226,20 +226,20 @@ def banned_word(query):
     color = discord.Color.blue()
     return actions.BUTTONS, {"emojis": ["ghush", "gir"], "embed": discord.Embed(description=desc, color=color)}
 
-def assert_count(txt):
+def assert_count(txt, author):
     global counter
     if not counter:
         num = re.match(r"^\d+", txt)
         if not num:
             return (actions.REACT, ["❓"]) 
-        counter = int(num[0])
+        counter = (int(num[0]), author)
 
         return (actions.REACT, ["✅"])
 
     nums = [int(s) for s in txt.split() if s.isdigit()]
-    if (counter+1) not in nums:
+    if (counter[0]+1) not in nums or author == counter[1]:
         return (actions.REACT, ["😡"])
-    counter+=1
+    counter = (counter[0] + 1, author)
     return (actions.IGNORE, None)
 
     
@@ -248,7 +248,7 @@ def parse_query(query, debug=False):
     content = query if debug else query.content
     ret = []
     if query.channel.id == query.channel.id == COUNT_ID:
-        ret.append(assert_count(content))
+        ret.append(assert_count(content, query.author.id))
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
         ret.append((todays_holiday()))
     if re.match(r"^\s*/test_verse\s*$", content) and query.author.id == ADMIN_ID:
