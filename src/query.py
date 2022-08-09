@@ -228,7 +228,7 @@ def banned_word(query):
 
 def assert_count(txt):
     if not counter:
-        num = re.match(r"^\d+, txt)
+        num = re.match(r"^\d+", txt)
         if not num:
             return (actions.REACT, ["question"]) 
         counter = int(num[0])
