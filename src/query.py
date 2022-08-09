@@ -227,8 +227,8 @@ def banned_word(query):
     return actions.BUTTONS, {"emojis": ["ghush", "gir"], "embed": discord.Embed(description=desc, color=color)}
 
 def assert_count(txt):
-
     if not counter:
+        return (actions.REPLY, "hmmm")
         num = re.match(r"^\d+", txt)
         if not num:
             return (actions.REACT, ["🇬"]) 
@@ -248,7 +248,7 @@ def assert_count(txt):
 def parse_query(query, debug=False):
     content = query if debug else query.content
     ret = []
-    if query.channel.id == COUNT_ID:
+    if query.author.id == ADMIN_ID:#query.channel.id == COUNT_ID:
         ret.append(assert_count(content))
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
         ret.append((todays_holiday()))
