@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup as soup
 from urllib.request import Request, urlopen
 from urllib.parse import quote
 
-ADMIN_ID = 213341816324489217
+ADMIN_IDS = [213341816324489217, 209687706349993985, 803982632554594335]
 START_DATE = "2021-10-24"
 SEED = "LUKE"
 COUNT_ID = 1002183766682390539

@@ -1,4 +1,4 @@
-from cons import load_json, actions, ADMIN_ID, SEED, COUNT_ID, START_DATE, err_exit, load_page, rm_message
+from cons import load_json, actions, ADMIN_IDS, SEED, COUNT_ID, START_DATE, err_exit, load_page, rm_message
 from datetime import date, datetime
 from itertools import groupby
 
@@ -270,7 +270,7 @@ def parse_query(query, debug=False):
         ret.append((actions.REACT, ["🇬", "🇲", "baj"]))
     elif re.search(r"(\W|_|\d|^)(gn|գն|bg|բգ)(\W|_|\d|$)", content, flags=re.UNICODE|re.IGNORECASE):
         ret.append((actions.REACT, ["🇬", "🇳", "gandz"]))
-    if re.match(r"^s*/restart_luke\s*$", content) and query.author.id == ADMIN_ID:
+    if re.match(r"^s*/restart_luke\s*$", content) and query.author.id in ADMIN_IDS:
         ret.append((actions.EXIT, "ok"))
 
     return ret
