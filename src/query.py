@@ -188,8 +188,8 @@ async def process_reaction(client, players, payload):
         msg = await client.get_channel(payload.channel_id).fetch_message(payload.message_id)        
         await msg.add_reaction("🔁")
         await msg.add_reaction("✅")
-        #if any("✅" == r for r in msg.reactions)
-        #    return
+        if "✅" in msg.reactions:
+            return
         exit(0)
 
 
