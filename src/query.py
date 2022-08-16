@@ -186,10 +186,10 @@ async def process_reaction(client, players, payload):
 
     if payload.emoji.name == "🔁" and payload.member.id in ADMIN_IDS:
         msg = await client.get_channel(payload.channel_id).fetch_message(payload.message_id)        
-        await msg.add_reaction("🔁")
-        await msg.add_reaction("✅")
         if "✅" in msg.reactions:
             return
+        await msg.add_reaction("🔁")
+        await msg.add_reaction("✅")
         exit(0)
 
 
