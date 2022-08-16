@@ -183,6 +183,14 @@ def zatik_reply():
 
 
 async def process_reaction(client, players, payload):
+    if payload.emoji.name == "repeat" and payload.payload.member.id in ADMIN_IDS:
+        msg = client.get_channel(payload.channel_id).fetch_message(payload.message_id)        
+        await msg.add_reaction("🔁")
+        await msg.add_reaction("✅")
+        exit(0)
+
+
+
     k = (payload.channel_id, payload.message_id)
 
     if k not in players:
@@ -251,9 +259,9 @@ def parse_query(query, debug=False):
     ret = []
     if query.channel.id == COUNT_ID:
         ret.append(assert_count(content, query.author.id))
-    if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id == ADMIN_ID:
+    if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id in ADMIN_IDS:
         ret.append((todays_holiday()))
-    if re.match(r"^\s*/test_verse\s*$", content) and query.author.id == ADMIN_ID:
+    if re.match(r"^\s*/test_verse\s*$", content) and query.author.id in ADMIN_IDS:
         ret.append((daily_verse()))
     if re.match(r"^\s*/verse\s*$", content):
         ret.append((random_verse()))
