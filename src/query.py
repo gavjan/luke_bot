@@ -183,7 +183,7 @@ def zatik_reply():
 
 
 async def process_reaction(client, players, payload):
-    if payload.emoji.name == "repeat" and payload.payload.member.id in ADMIN_IDS:
+    if payload.emoji.name == "repeat" and payload.member.id in ADMIN_IDS:
         msg = client.get_channel(payload.channel_id).fetch_message(payload.message_id)        
         await msg.add_reaction("🔁")
         await msg.add_reaction("✅")
