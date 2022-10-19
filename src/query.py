@@ -244,7 +244,9 @@ def assert_count(txt, author):
     if not counter:
         num = re.match(r"^\d+", txt)
         if not num:
-            return (actions.REACT, ["❓"]) 
+            return (actions.REACT, ["❓"])
+        if int(num[0]) == 5000:
+            return (actions.REPLY, f"{author}")
         counter = (int(num[0]), author)
 
         return (actions.REACT, ["♻️"])
