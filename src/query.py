@@ -244,7 +244,7 @@ def banned_word(query):
     color = discord.Color.blue()
     return actions.BUTTONS, {"emojis": ["ghush", "gir"], "embed": discord.Embed(description=desc, color=color)}
 
-def gav(num author):
+def gav(num, author):
     return (num == 5000) and (f"{author}" == "213341816324489217")
 
 def assert_count(txt, author):
