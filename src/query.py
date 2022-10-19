@@ -197,7 +197,7 @@ async def process_reaction(client, players, payload):
     k = (payload.channel_id, payload.message_id)
     msg = await client.get_channel(payload.channel_id).fetch_message(payload.message_id)
     #if any("⛔" == r.emoji for r in msg.reactions):
-    if payload.emoji.name = "⛔":
+    if payload.emoji.name == "⛔":
         await rm_message(client, k[0], k[1])
         return
 
