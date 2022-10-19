@@ -196,7 +196,7 @@ async def process_reaction(client, players, payload):
 
     k = (payload.channel_id, payload.message_id)
     msg = await client.get_channel(payload.channel_id).fetch_message(payload.message_id)
-    if any("🇿" == r.emoji for r in msg.reactions):
+    if any("⛔" == r.emoji for r in msg.reactions):
         await rm_message(client, k[0], k[1])
         return
 
@@ -244,14 +244,16 @@ def banned_word(query):
     color = discord.Color.blue()
     return actions.BUTTONS, {"emojis": ["ghush", "gir"], "embed": discord.Embed(description=desc, color=color)}
 
+def gav(num author):
+    return (num == 5000) and (f"{author}" == "213341816324489217")
+
 def assert_count(txt, author):
     global counter
     if not counter:
         num = re.match(r"^\d+", txt)
         if not num:
             return (actions.REACT, ["❓"])
-        if int(num[0]) == 5000 and f"{author}" == "213341816324489217":
-            return (actions.REACT, ["🇬", "🇦"])
+        if gav(int(num[0]), author): return (actions.REACT, ["🇬", "🇦", "🇻", "⬛", "🇴", "🇳", "🇱", "🇾", "⛔"])
         counter = (int(num[0]), author)
 
         return (actions.REACT, ["♻️"])
@@ -259,6 +261,7 @@ def assert_count(txt, author):
     nums = [int(''.join(i)) for is_digit, i in groupby(txt, str.isdigit) if is_digit]
     if ((counter[0]+1 not in nums) and ("gif" not in txt)) or author == counter[1]:
         return (actions.REACT, "😡")
+    if gav(counter[0], author): return (actions.REACT, ["🇬", "🇦", "🇻", "⬛", "🇴", "🇳", "🇱", "🇾", "⛔"])
     counter = (counter[0] + 1, author)
     return (actions.IGNORE, None)
 
