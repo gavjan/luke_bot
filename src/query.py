@@ -244,7 +244,7 @@ def banned_word(query):
     return actions.BUTTONS, {"emojis": ["ghush", "gir"], "embed": discord.Embed(description=desc, color=color)}
 
 def gav(num, author):
-    return (num == 5000) and (f"{author}" != "213341816324489217")
+    return (num == 6000) and (f"{author}" != "212246620945776651")
 
 def assert_count(txt, author):
     global counter
@@ -252,7 +252,7 @@ def assert_count(txt, author):
         num = re.match(r"^\d+", txt)
         if not num:
             return (actions.REACT, ["❓"])
-        if gav(int(num[0]), author): return (actions.REACT, ["🇬", "🇦", "🇻", "⬛", "🇴", "🇳", "🇱", "🇾", "⛔"])
+        if gav(int(num[0]), author): return (actions.REACT, ["🇲", "🇪", "🇸", "⬛", "🇴", "🇳", "🇱", "🇾", "⛔"])
         counter = (int(num[0]), author)
 
         return (actions.REACT, ["♻️"])
