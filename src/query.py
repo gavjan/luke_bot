@@ -264,8 +264,8 @@ def assert_count(txt, author):
 
 
 async def count_stats(client):
-    return actions.REPLY, "yes"
     thread = await client.fetch_channel(COUNT_ID)
+    return actions.REPLY, "yes"
     stats = {}
     async for message in thread.history():
         user = message.author.name
