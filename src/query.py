@@ -265,12 +265,27 @@ def assert_count(txt, author):
     return (actions.IGNORE, None)
 
     
+def count_stats():
+    thread = await client.fetch_channel(COUNT_ID)
+    stats = {}
+    async for message in thread.history():
+        user = message.author.name
+        if user not in stats:
+            stats[user] = 1
+        else:
+            stats[user] += 1
+    msg = ""
+    for k in stats:
+        msg+=f"{k}: {stats[k]}\n"
+    return (actions.REPLY, msg)
 
 def parse_query(query, debug=False):
     content = query if debug else query.content
     ret = []
     if query.channel.id == COUNT_ID:
         ret.append(assert_count(content, query.author.id))
+    if re.match(r"^\s*/count_stats\s*$", content):
+        ret.append((count_stats()))
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id in ADMIN_IDS:
         ret.append((todays_holiday()))
     if re.match(r"^\s*/test_verse\s*$", content) and query.author.id in ADMIN_IDS:
