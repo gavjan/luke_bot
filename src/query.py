@@ -264,8 +264,6 @@ def assert_count(txt, author):
 
 
 async def count_stats(client):
-    return actions.REPLY, "yes"
-    print("Counting...")
     thread = await client.fetch_channel(COUNT_ID)
     stats = {}
     async for message in thread.history():
@@ -280,13 +278,13 @@ async def count_stats(client):
     return actions.REPLY, msg
 
 
-def parse_query(query, client, debug=False):
+async def parse_query(query, client, debug=False):
     content = query if debug else query.content
     ret = []
     if query.channel.id == COUNT_ID:
         ret.append(assert_count(content, query.author.id))
     if re.match(r"^\s*/count_stats\s*$", content):
-        ret.append((count_stats(client)))
+        ret.append((await count_stats(client)))
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id in ADMIN_IDS:
         ret.append((todays_holiday()))
     if re.match(r"^\s*/test_verse\s*$", content) and query.author.id in ADMIN_IDS:
