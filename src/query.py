@@ -183,7 +183,6 @@ def zatik_reply():
 
 
 async def process_reaction(client, players, payload):
-
     if payload.emoji.name == "🔁" and payload.member.id in ADMIN_IDS:
         msg = await client.get_channel(payload.channel_id).fetch_message(payload.message_id)
         if any("✅" == r.emoji for r in msg.reactions):
@@ -192,13 +191,10 @@ async def process_reaction(client, players, payload):
         await msg.add_reaction("✅")
         exit(0)
 
-
-
     k = (payload.channel_id, payload.message_id)
     if payload.emoji.name == "⛔":
         await rm_message(client, k[0], k[1])
         return
-
 
     if k not in players:
         return
@@ -243,8 +239,10 @@ def banned_word(query):
     color = discord.Color.blue()
     return actions.BUTTONS, {"emojis": ["ghush", "gir"], "embed": discord.Embed(description=desc, color=color)}
 
+
 def gav(num, author):
     return (num == 6000) and (f"{author}" != "212246620945776651")
+
 
 def assert_count(txt, author):
     global counter
@@ -258,37 +256,35 @@ def assert_count(txt, author):
         return (actions.REACT, ["♻️"])
 
     nums = [int(''.join(i)) for is_digit, i in groupby(txt, str.isdigit) if is_digit]
-    if ((counter[0]+1 not in nums) and ("gif" not in txt)) or author == counter[1]:
+    if ((counter[0] + 1 not in nums) and ("gif" not in txt)) or author == counter[1]:
         return (actions.REACT, "😡")
     if gav(counter[0] + 1, author): return (actions.REACT, ["🇬", "🇦", "🇻", "⬛", "🇴", "🇳", "🇱", "🇾", "⛔"])
     counter = (counter[0] + 1, author)
     return (actions.IGNORE, None)
 
-    
-def count_stats():
-    pass
-    #thread = await client.fetch_channel(COUNT_ID)
-    #stats = {}
-    #async for message in thread.history():
 
-    #for message in thread.history():
-    #    user = message.author.name
-    #    if user not in stats:
-    #        stats[user] = 1
-    #    else:
-    #        stats[user] += 1
-    #msg = ""
-    #for k in stats:
-    #    msg+=f"{k}: {stats[k]}\n"
-    #return (actions.REPLY, msg)
+async def count_stats(client):
+    thread = await client.fetch_channel(COUNT_ID)
+    stats = {}
+    async for message in thread.history():
+        user = message.author.name
+        if user not in stats:
+            stats[user] = 1
+        else:
+            stats[user] += 1
+    msg = ""
+    for k in stats:
+        msg += f"{k}: {stats[k]}\n"
+    return actions.REPLY, msg
 
-def parse_query(query, debug=False):
+
+def parse_query(query, client, debug=False):
     content = query if debug else query.content
     ret = []
     if query.channel.id == COUNT_ID:
         ret.append(assert_count(content, query.author.id))
-    #if re.match(r"^\s*/count_stats\s*$", content):
-    #    ret.append((count_stats()))
+    if re.match(r"^\s*/count_stats\s*$", content):
+        ret.append((count_stats(client)))
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id in ADMIN_IDS:
         ret.append((todays_holiday()))
     if re.match(r"^\s*/test_verse\s*$", content) and query.author.id in ADMIN_IDS:
@@ -304,9 +300,9 @@ def parse_query(query, debug=False):
         ret.append((zatik_reply()))
     if re.search(r"\b(nigger|նիգգեռ)\b", content, re.IGNORECASE):
         ret.append((banned_word(query)))
-    if re.search(r"(\W|_|\d|^)(gm|գմ)(\W|_|\d|$)", content, flags=re.UNICODE|re.IGNORECASE):
+    if re.search(r"(\W|_|\d|^)(gm|գմ)(\W|_|\d|$)", content, flags=re.UNICODE | re.IGNORECASE):
         ret.append((actions.REACT, ["🇬", "🇲", "baj"]))
-    elif re.search(r"(\W|_|\d|^)(gn|գն|bg|բգ)(\W|_|\d|$)", content, flags=re.UNICODE|re.IGNORECASE):
+    elif re.search(r"(\W|_|\d|^)(gn|գն|bg|բգ)(\W|_|\d|$)", content, flags=re.UNICODE | re.IGNORECASE):
         ret.append((actions.REACT, ["🇬", "🇳", "gandz"]))
     if re.match(r"^s*/restart_luke\s*$", content) and query.author.id in ADMIN_IDS:
         ret.append((actions.EXIT, "ok"))

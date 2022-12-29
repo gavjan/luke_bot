@@ -33,7 +33,7 @@ def main():
         try:
             if message.author == client.user:
                 return
-            for action, response in parse_query(message):
+            for action, response in parse_query(message, client):
                 if action == actions.SEND:
                     await message.channel.send(response)
                 elif action == actions.REPLY:
