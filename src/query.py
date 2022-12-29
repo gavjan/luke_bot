@@ -266,6 +266,7 @@ def assert_count(txt, author):
 
     
 def count_stats():
+    pass
     #thread = await client.fetch_channel(COUNT_ID)
     #stats = {}
     #async for message in thread.history():
