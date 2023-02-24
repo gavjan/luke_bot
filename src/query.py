@@ -1,4 +1,4 @@
-from cons import load_json, actions, ADMIN_IDS, SEED, COUNT_ID, START_DATE, err_exit, load_page, rm_message
+from cons import load_json, actions, ADMIN_IDS, TUS_ID, SEED, COUNT_ID, START_DATE, err_exit, load_page, rm_message
 from datetime import date, datetime
 from itertools import groupby
 
@@ -303,6 +303,8 @@ async def parse_query(query, client, debug=False):
         ret.append((banned_word(query)))
     if re.search(r"(\W|_|\d|^)(gm|գմ)(\W|_|\d|$)", content, flags=re.UNICODE | re.IGNORECASE):
         ret.append((actions.REACT, ["🇬", "🇲", "baj"]))
+    if query.author.id == TUS_ID
+        ret.append((actions.REACT, ["tus"]))
     elif re.search(r"(\W|_|\d|^)(gn|գն|bg|բգ)(\W|_|\d|$)", content, flags=re.UNICODE | re.IGNORECASE):
         ret.append((actions.REACT, ["🇬", "🇳", "gandz"]))
     if re.match(r"^s*/restart_luke\s*$", content) and query.author.id in ADMIN_IDS:
