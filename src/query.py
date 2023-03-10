@@ -192,9 +192,6 @@ async def process_reaction(client, players, payload):
         exit(0)
 
     k = (payload.channel_id, payload.message_id)
-    if payload.emoji.name == "⛔":
-        await rm_message(client, k[0], k[1])
-        return
 
     if k not in players:
         return
