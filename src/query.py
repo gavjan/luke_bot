@@ -1,4 +1,4 @@
-from cons import load_json, actions, ADMIN_IDS, TUS_ID, SEED, COUNT_ID, START_DATE, err_exit, load_page, rm_message
+from cons import load_json, actions, ADMIN_IDS, TUS_ID, SEED, COUNT_ID, START_DATE, err_exit, load_page, rm_message, STRUK_ID
 from datetime import date, datetime
 from itertools import groupby
 
@@ -302,6 +302,8 @@ async def parse_query(query, client, debug=False):
         ret.append((actions.REACT, ["🇬", "🇲", "baj"]))
     if query.author.id == TUS_ID:
         ret.append((actions.REACT, ["tus"]))
+    if STRUK_ID in [x.id for x in query.author.roles]:
+        ret.append((actions.REACT, ["🇳"]))
     elif re.search(r"(\W|_|\d|^)(gn|գն|bg|բգ)(\W|_|\d|$)", content, flags=re.UNICODE | re.IGNORECASE):
         ret.append((actions.REACT, ["🇬", "🇳", "gandz"]))
     if re.match(r"^s*/restart_luke\s*$", content) and query.author.id in ADMIN_IDS:
