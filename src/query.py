@@ -303,7 +303,9 @@ async def parse_query(query, client, debug=False):
     if query.author.id == TUS_ID:
         ret.append((actions.REACT, ["tus"]))
     if STRUK_ID in [x.id for x in query.author.roles]:
-        await rm_message(client, query.channel_id, query.message_id)
+        ret.append((actions.REPLY, f"channel={query.channel_id}, message={query.message_id}"))
+        ret.append((actions.REPLY, f"{query}"))
+        # await rm_message(client, query.channel_id, query.message_id)
         ret.append((actions.REACT, ["🇳"]))
     elif re.search(r"(\W|_|\d|^)(gn|գն|bg|բգ)(\W|_|\d|$)", content, flags=re.UNICODE | re.IGNORECASE):
         ret.append((actions.REACT, ["🇬", "🇳", "gandz"]))
