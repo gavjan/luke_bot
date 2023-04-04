@@ -68,8 +68,8 @@ def create_message_image(client, message, text, author, created_at):
     
     print(f"{highest_role=}\n\n")
 
-    print("GUILD_ID = " + message.guild.id)
-    print("role_id = " + highest_role.id)
+    print(f"GUILD_ID = {message.guild.id}")
+    print("role_id = {highest_role.id}")
 
     guild = client.get_guild(message.guild.id)
     print("{guild=}")
