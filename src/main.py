@@ -97,14 +97,13 @@ async def main():
       
 
     
-    
-        
+    print("Running")
+    await client.run(getenv("bot_token"))
     async with client:
         client.loop.create_task(background_task(daily_verse_task, WHEN_VERSE))
         client.loop.create_task(background_task(daily_holiday_task, WHEN_HOLIDAY))
         await client.wait_until_ready()
     
-    await client.run(getenv("bot_token"))
 
 
 if __name__ == "__main__":
