@@ -12,8 +12,7 @@ def main():
     WHEN_HOLIDAY = time(4, 0, 0)  # 4 AM UTC
     default_channel_id = 456178384016244738
 
-    intents = discord.Intents.all()
-    client = commands.Bot(command_prefix="!", intents)
+    client = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 
     @client.event
     async def on_ready():
