@@ -1,4 +1,4 @@
-from cons import load_json, actions, ADMIN_IDS, TUS_ID, SEED, COUNT_ID, START_DATE, err_exit, load_page, rm_message, STRUK_ID
+from cons import load_json, actions, ADMIN_IDS, TUS_ID, TUS_THREAD_ID, SEED, COUNT_ID, START_DATE, err_exit, load_page, rm_message, STRUK_ID
 from datetime import date, datetime
 from itertools import groupby
 from screenshot import create_message_image
@@ -282,8 +282,10 @@ def pray(text):
 async def tus_moment(message):
     ref_message = await message.channel.fetch_message(message.reference.message_id)
     create_message_image(f"{message.content}", message.author, message.created_at)
+
+    tus_thread = await client.fetch_channel(TUS_THREAD_ID)
     with open('message.png', 'rb') as f:
-        await ref_message.channel.send(file=discord.File(f))
+        await tus_thread.send(file=discord.File(f))
     return actions.REACT, ["✅"]
 
 async def parse_query(query, client, debug=False):
