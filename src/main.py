@@ -7,7 +7,7 @@ import asyncio
 import discord
 
 
-async def main():
+def main():
     WHEN_VERSE = time(16, 0, 0)  # 4 PM UTC
     WHEN_HOLIDAY = time(4, 0, 0)  # 4 AM UTC
     default_channel_id = 456178384016244738
@@ -66,49 +66,9 @@ async def main():
 
             err_exit(e)
 
-    async def daily_verse_task():
-        await client.wait_until_ready()
-        channel = client.get_channel(default_channel_id)
-        action, response = daily_verse()
-        await channel.send(embed=response)
 
-    async def daily_holiday_task():
-        await client.wait_until_ready()
-        channel = client.get_channel(default_channel_id)
-        action, response = todays_holiday()
-        if action == actions.EMBED:
-            await channel.send(embed=response)
-
-    async def background_task(func, when):
-        now = datetime.utcnow()
-        if now.time() > when:
-            tomorrow = datetime.combine(now.date() + timedelta(days=1), time(0))
-            seconds = (tomorrow - now).total_seconds()
-            await asyncio.sleep(seconds)
-        while True:
-            now = datetime.utcnow()
-            target_time = datetime.combine(now.date(), when)
-            seconds_until_target = (target_time - now).total_seconds()
-            await asyncio.sleep(seconds_until_target)
-            await func()
-            tomorrow = datetime.combine(now.date() + timedelta(days=1), time(0))
-            seconds = (tomorrow - now).total_seconds()
-            await asyncio.sleep(seconds)
-      
-
-    
-    
-    
-    async with client:
-        client.loop.create_task(background_task(daily_verse_task, WHEN_VERSE))
-        client.loop.create_task(background_task(daily_holiday_task, WHEN_HOLIDAY))
-        client.run(getenv("bot_token"))
-        print("Running")
-        await client.wait_until_ready()
-    
-    
-    
+    client.run(getenv("bot_token"))
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
