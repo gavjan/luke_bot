@@ -281,7 +281,7 @@ def pray(text):
     return actions.SEND, embed
 async def tus_moment(message):
     ref_message = await message.channel.fetch_message(message.reference.message_id)
-    create_message_image(f"{message.content}", message.author, message.created_at)
+    create_message_image(f"{ref_message.content}", ref_message.author, ref_message.created_at)
 
     tus_thread = await client.fetch_channel(TUS_THREAD_ID)
     with open('message.png', 'rb') as f:
