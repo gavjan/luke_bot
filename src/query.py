@@ -282,6 +282,8 @@ def pray(text):
 async def tus_moment(message):
     ref_message = await message.channel.fetch_message(message.reference.message_id)
     create_message_image(f"{message.content}", message.author, message.created_at)
+    with open('message.png', 'rb') as f:
+        await ref_message.channel.send(file=discord.File(f))
     return actions.REACT, ["✅"]
 
 async def parse_query(query, client, debug=False):
