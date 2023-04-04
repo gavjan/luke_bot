@@ -1,7 +1,7 @@
 from cons import load_json, actions, ADMIN_IDS, TUS_ID, SEED, COUNT_ID, START_DATE, err_exit, load_page, rm_message, STRUK_ID
 from datetime import date, datetime
 from itertools import groupby
-# from screenshot import create_message_image
+from screenshot import create_message_image
 
 import re
 import discord
@@ -279,7 +279,10 @@ async def count_stats(client):
 def pray(text):
     embed = discord.Embed(title="Anonymous Prayer", description=text, color=discord.Color.blue())
     return actions.SEND, embed
-
+def tus_moment(message):
+    ref_message = await message.channel.fetch_message(message.reference.message_id)
+    create_message_image(f"{message.content}", message.author, message.created_at)
+    return actions.REACT, ["✅"]
 
 async def parse_query(query, client, debug=False):
     content = query if debug else query.content
@@ -290,6 +293,8 @@ async def parse_query(query, client, debug=False):
         ret.append((await count_stats(client)))
     if re.match(r"^\s*/pray\s*$", content):
         ret.append((pray(content)))
+    if re.match(r"^\s*/tus_moment\s*$", content):
+        ret.append((tus_moment(query)))
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id in ADMIN_IDS:
         ret.append((todays_holiday()))
     if re.match(r"^\s*/test_verse\s*$", content) and query.author.id in ADMIN_IDS:
