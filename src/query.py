@@ -1,7 +1,7 @@
 from cons import load_json, actions, ADMIN_IDS, TUS_ID, SEED, COUNT_ID, START_DATE, err_exit, load_page, rm_message, STRUK_ID
 from datetime import date, datetime
 from itertools import groupby
-from screenshot import create_message_image
+# from screenshot import create_message_image
 
 import re
 import discord
