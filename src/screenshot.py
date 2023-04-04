@@ -22,6 +22,7 @@ date_font = ImageFont.truetype("dejavu-sans.ttf", 11)
 
 
 def create_message_image(text, author, created_at):
+    global BACKGROUND_COLOR, TEXT_COLOR, DATE_COLOR, IMAGE_WIDTH, IMAGE_HEIGHT, pfp_size, pfp_padding, wrap
 
     # Create a new image
     image = Image.new('RGB', (IMAGE_WIDTH, IMAGE_HEIGHT), color = BACKGROUND_COLOR)
