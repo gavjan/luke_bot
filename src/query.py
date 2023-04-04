@@ -279,7 +279,7 @@ async def count_stats(client):
 def pray(text):
     embed = discord.Embed(title="Anonymous Prayer", description=text, color=discord.Color.blue())
     return actions.SEND, embed
-async def tus_moment(message):
+async def tus_moment(client, message):
     ref_message = await message.channel.fetch_message(message.reference.message_id)
     create_message_image(f"{ref_message.content}", ref_message.author, ref_message.created_at)
 
@@ -298,7 +298,7 @@ async def parse_query(query, client, debug=False):
     if re.match(r"^\s*/pray\s*$", content):
         ret.append((pray(content)))
     if re.match(r"^\s*/tus_moment\s*$", content):
-        ret.append((await tus_moment(query)))
+        ret.append((await tus_moment(client, query)))
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id in ADMIN_IDS:
         ret.append((todays_holiday()))
     if re.match(r"^\s*/test_verse\s*$", content) and query.author.id in ADMIN_IDS:
