@@ -65,7 +65,8 @@ def create_message_image(text, author, created_at):
     # Get the role color
     role_color = highest_role.color.to_rgb()
 
-
+    print(f"{highest_role=}\n\n")
+    print(f"{dir(highest_role)}")
     # Check if the role has a custom icon
     has_custom_icon = highest_role.display_icon is not None
 
