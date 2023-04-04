@@ -98,7 +98,7 @@ async def main():
 
     client.loop.create_task(background_task(daily_verse_task, WHEN_VERSE))
     client.loop.create_task(background_task(daily_holiday_task, WHEN_HOLIDAY))
-    client.run(getenv("bot_token"))
+    await client.run(getenv("bot_token"))
 
 
 if __name__ == "__main__":
