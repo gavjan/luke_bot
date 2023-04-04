@@ -7,7 +7,7 @@ import asyncio
 import discord
 
 
-def main():
+async def main():
     WHEN_VERSE = time(16, 0, 0)  # 4 PM UTC
     WHEN_HOLIDAY = time(4, 0, 0)  # 4 AM UTC
     default_channel_id = 456178384016244738
@@ -102,4 +102,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
