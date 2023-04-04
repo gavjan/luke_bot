@@ -67,17 +67,7 @@ def create_message_image(client, message, text, author, created_at):
 
     
     print(f"{highest_role=}\n\n")
-
-    print(f"GUILD_ID = {message.guild.id}")
-    print("role_id = {highest_role.id}")
-
-    guild = client.get_guild(message.guild.id)
-    print("{guild=}")
-
-
-    role = guild.get_role(highest_role.id)
-    print(f"{role=}")
-    print(dir(role))
+    print(dir(highest_role))
 
 
     # Check if the role has a custom icon
