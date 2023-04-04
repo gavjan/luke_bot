@@ -276,6 +276,10 @@ async def count_stats(client):
         msg += f"{k}: {stats[k]}\n"
     return actions.REPLY, msg
 
+def pray(text):
+    embed = discord.Embed(title="Anonymous Prayer", description=text, color=discord.Color.blue())
+    return actions.SEND, embed
+
 
 async def parse_query(query, client, debug=False):
     content = query if debug else query.content
@@ -284,6 +288,8 @@ async def parse_query(query, client, debug=False):
     #    ret.append(assert_count(content, query.author.id))
     if re.match(r"^\s*/count_stats\s*$", content):
         ret.append((await count_stats(client)))
+    if re.match(r"^\s*/pray\s*$", content):
+        ret.append((pray(content)))
     if re.match(r"^\s*/test_holiday\s*$", content) and query.author.id in ADMIN_IDS:
         ret.append((todays_holiday()))
     if re.match(r"^\s*/test_verse\s*$", content) and query.author.id in ADMIN_IDS:
