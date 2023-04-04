@@ -21,7 +21,7 @@ date_font = ImageFont.truetype("dejavu-sans.ttf", 11)
 
 
 
-def create_message_image(text, author, created_at):
+def create_message_image(client, message, text, author, created_at):
     global BACKGROUND_COLOR, TEXT_COLOR, DATE_COLOR, IMAGE_WIDTH, IMAGE_HEIGHT, pfp_size, pfp_padding, wrap
 
     # Create a new image
@@ -65,8 +65,21 @@ def create_message_image(text, author, created_at):
     # Get the role color
     role_color = highest_role.color.to_rgb()
 
+    
     print(f"{highest_role=}\n\n")
-    print(f"{dir(highest_role._state)}")
+
+    print("GUILD_ID = " + message.guild.id)
+    print("role_id = " + highest_role.id)
+
+    guild = client.get_guild(message.guild.id)
+    print("{guild=}")
+
+
+    role = guild.get_role(highest_role.id)
+    print(f"{role=}")
+    print(dir(role))
+
+
     # Check if the role has a custom icon
     has_custom_icon = highest_role.display_icon is not None
 
@@ -128,7 +141,7 @@ if __name__ == "__main__":
     async def on_message(message):
         if message.author.id == 213341816324489217:
             print(message.content)
-            create_message_image(f"{message.content}", message.author, message.created_at)
+            create_message_image(client, message, f"{message.content}", message.author, message.created_at)
             with open('message.png', 'rb') as f:
                 await message.channel.send(file=discord.File(f))
         
