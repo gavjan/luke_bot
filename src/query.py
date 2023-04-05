@@ -290,7 +290,9 @@ async def tus_moment(client, message):
 
     tus_thread = await client.fetch_channel(TUS_THREAD_ID)
     with open('message.png', 'rb') as f:
-        await tus_thread.send(ref_message.jump_url, file=discord.File(f))
+        sent_msg = await tus_thread.send(ref_message.jump_url, file=discord.File(f))
+    emoji = get(client.emojis, name="tus")
+    await sent_msg.add_reaction(emoji or emoji_id)
     return actions.REACT, ["✅"]
 
 async def parse_query(query, client, debug=False):
