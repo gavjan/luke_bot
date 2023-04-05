@@ -59,7 +59,7 @@ def create_message_image(message):
 
     # Load the profile picture
     response = requests.get(author.avatar.url)
-    if author.id == OLD_TUS_ID:
+    if message.author.id == OLD_TUS_ID:
         response = requests.get(OLD_TUS_PFP_URL)
     profile_picture = Image.open(BytesIO(response.content))
 
@@ -110,8 +110,8 @@ def create_message_image(message):
 
     # Draw the username and message text onto the image
     username = author.display_name
-    if author.id == OLD_TUS_ID:
-        username = "Թուս the White Մոմենտ"
+    if message.author.id == OLD_TUS_ID:
+        username = "Թուս the Gray Մոմենտ"
     username_width = draw.textsize(username, font=username_font)[0]
     username_color = tuple(role_color)
     draw.text((pfp_padding, 10), username, font=username_font, fill=username_color)
