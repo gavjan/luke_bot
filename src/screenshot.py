@@ -94,8 +94,10 @@ def create_message_image(text, author, created_at):
     username_width = draw.textsize(username, font=username_font)[0]
     username_color = tuple(role_color)
     draw.text((pfp_padding, 10), username, font=username_font, fill=username_color)
+    
+    # Paste the role icon
     if role_icon:
-        image.paste(role_icon, (pfp_padding + username_width + 4, 18))
+        image.paste(role_icon, (pfp_padding + username_width + 4, 18), role_icon)
 
     # Draw the date
     date = created_at.strftime('%m/%d/%Y %I:%M %p')
