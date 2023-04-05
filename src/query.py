@@ -280,6 +280,9 @@ def pray(text):
     embed = discord.Embed(title="Anonymous Prayer", description=text, color=discord.Color.blue())
     return actions.SEND, embed
 async def tus_moment(client, message):
+    if message.reference is None:
+        return actions.REACT, ["❓"]
+
     ref_message = await message.channel.fetch_message(message.reference.message_id)
     create_message_image(ref_message)
 
@@ -319,7 +322,7 @@ async def parse_query(query, client, debug=False):
     if query.author.id == TUS_ID:
         ret.append((actions.REACT, ["tus"]))
     if STRUK_ID in [x.id for x in query.author.roles]:
-        await rm_message(client, query.channel.id, query.id)
+        ret.append((actions.REMOVE, None))
     if query.channel.id == TUS_THREAD_ID:
         ret.append((actions.REMOVE, None))
     elif re.search(r"(\W|_|\d|^)(gn|գն|bg|բգ)(\W|_|\d|$)", content, flags=re.UNICODE | re.IGNORECASE):
