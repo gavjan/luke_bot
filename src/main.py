@@ -57,7 +57,7 @@ def main():
                         emoji = get(client.emojis, name=emoji_id)
                         await sent.add_reaction(emoji or emoji_id)
                 elif action == actions.REMOVE:
-                    rm_message(client, message.channel.id, message.id)
+                    await rm_message(client, message.channel.id, message.id)
                 elif action == actions.EXIT:
                     await message.reply(response)
                     exit(0)
