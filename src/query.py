@@ -321,7 +321,7 @@ async def parse_query(query, client, debug=False):
     if STRUK_ID in [x.id for x in query.author.roles]:
         await rm_message(client, query.channel.id, query.id)
     if query.channel.id == TUS_THREAD_ID:
-        await rm_message(client, query.channel.id, query.id)
+        ret.append((actions.REMOVE, None))
     elif re.search(r"(\W|_|\d|^)(gn|գն|bg|բգ)(\W|_|\d|$)", content, flags=re.UNICODE | re.IGNORECASE):
         ret.append((actions.REACT, ["🇬", "🇳", "gandz"]))
     if re.match(r"^s*/restart_luke\s*$", content) and query.author.id in ADMIN_IDS:

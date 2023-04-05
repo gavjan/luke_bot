@@ -35,6 +35,7 @@ class actions(enum.Enum):
     DM = 7
     REACT = 8
     BUTTONS = 9
+    REMOVE = 10
 
 
 def getenv(name):
