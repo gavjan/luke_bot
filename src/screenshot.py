@@ -97,7 +97,7 @@ def create_message_image(text, author, created_at):
     
     # Paste the role icon
     if role_icon:
-        image.paste(role_icon, (pfp_padding + username_width + 4, 18 - role_icon.size[1]//2), role_icon)
+        image.paste(role_icon, (pfp_padding + username_width + 4, 20 - role_icon.size[1]//2), role_icon)
 
     # Draw the date
     date = created_at.strftime('%m/%d/%Y %I:%M %p')
