@@ -80,7 +80,7 @@ def create_message_image(text, author, created_at):
         
 
         response = requests.get(f"{role_icon_url}?size=20")
-        role_icon = Image.open(BytesIO(response.content))
+        role_icon = Image.open(BytesIO(response.content)).convert("RGBA")
         role_icon_size = role_icon.size
         role_icon = role_icon.resize(role_icon_size)
     else:
