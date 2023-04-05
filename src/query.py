@@ -290,7 +290,7 @@ async def tus_moment(client, message):
 
     tus_thread = await client.fetch_channel(TUS_THREAD_ID)
     with open('message.png', 'rb') as f:
-        await tus_thread.send(message.jump_url, file=discord.File(f))
+        await tus_thread.send(ref_message.jump_url, file=discord.File(f))
     return actions.REACT, ["✅"]
 
 async def parse_query(query, client, debug=False):
