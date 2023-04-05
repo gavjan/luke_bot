@@ -2,6 +2,7 @@ from cons import load_json, actions, ADMIN_IDS, TUS_ID, TUS_THREAD_ID, SEED, COU
 from datetime import date, datetime
 from itertools import groupby
 from screenshot import create_message_image
+from discord.utils import get
 
 import re
 import discord
@@ -291,8 +292,10 @@ async def tus_moment(client, message):
     tus_thread = await client.fetch_channel(TUS_THREAD_ID)
     with open('message.png', 'rb') as f:
         sent_msg = await tus_thread.send(ref_message.jump_url, file=discord.File(f))
+    
     emoji = get(client.emojis, name="tus")
     await sent_msg.add_reaction(emoji or emoji_id)
+    
     return actions.REACT, ["✅"]
 
 async def parse_query(query, client, debug=False):

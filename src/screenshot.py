@@ -38,7 +38,6 @@ def create_message_image(message):
 
     if author.id == OLD_TUS_ID:
         author = message.guild.get_member(TUS_ID)
-        print(f"new author is {author}")
 
     
     global BACKGROUND_COLOR, TEXT_COLOR, DATE_COLOR, IMAGE_WIDTH, IMAGE_HEIGHT, pfp_size, pfp_padding, wrap
