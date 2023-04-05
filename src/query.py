@@ -232,7 +232,7 @@ def banned_word(query):
         return actions.IGNORE, None
 
     desc = "Դուք օգտագործեցիք արգելված բառ։ \n" \
-           "Ըստ ԿՈՒՂԲ≈ † =∞ ֊ի սահմանադրության, դուք պետք է պարգևատրվեք կամ պատժեք։\n" \
+           "Ըստ ԿՈՒՂԲ≈ † =∞ ֊ի սահմանադրության, դուք պետք է պարգևատրվեք կամ պատժվեք։\n" \
            "Ընտրեք Ղուշ կամ Գիր սկսելու համար։\nԱստված ձեզ հետ։\nԱմեն🙏"
     color = discord.Color.blue()
     return actions.BUTTONS, {"emojis": ["ghush", "gir"], "embed": discord.Embed(description=desc, color=color)}
@@ -281,7 +281,7 @@ def pray(text):
     return actions.SEND, embed
 async def tus_moment(client, message):
     ref_message = await message.channel.fetch_message(message.reference.message_id)
-    create_message_image(f"{ref_message.content}", ref_message.author, ref_message.created_at)
+    create_message_image(ref_message)
 
     tus_thread = await client.fetch_channel(TUS_THREAD_ID)
     with open('message.png', 'rb') as f:
