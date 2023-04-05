@@ -280,6 +280,8 @@ def pray(text):
     embed = discord.Embed(title="Anonymous Prayer", description=text, color=discord.Color.blue())
     return actions.SEND, embed
 async def tus_moment(client, message):
+    if not message.author.top_role.permissions.administrator:
+        return actions.REACT, ["🚫"]
     if message.reference is None:
         return actions.REACT, ["❓"]
 
