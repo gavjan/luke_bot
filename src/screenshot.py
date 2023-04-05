@@ -80,7 +80,7 @@ def create_message_image(text, author, created_at):
         
 
         response = requests.get(f"{role_icon_url}?size=20")
-        role_icon = Image.open(BytesIO(response.content)).convert("RGBA")
+        role_icon = Image.open(BytesIO(response.content))
         role_icon_size = role_icon.size
         role_icon = role_icon.resize(role_icon_size)
     else:
@@ -97,7 +97,7 @@ def create_message_image(text, author, created_at):
     
     # Paste the role icon
     if role_icon:
-        image.paste(role_icon, (pfp_padding + username_width + 4, 18), role_icon)
+        image.paste(role_icon, (pfp_padding + username_width + 4, 18 - role_icon.size[1]//2), role_icon)
 
     # Draw the date
     date = created_at.strftime('%m/%d/%Y %I:%M %p')
