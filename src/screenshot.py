@@ -1,3 +1,4 @@
+import re
 import discord
 import requests
 import textwrap
