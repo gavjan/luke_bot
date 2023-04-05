@@ -74,6 +74,7 @@ def create_message_image(text, author, created_at):
     # Load the role icon if it exists
     if has_custom_icon and highest_role.display_icon.url:
         role_icon_url = highest_role.display_icon.url
+        print(f"{role_icon_url=}")
         if "?size=" in role_icon_url:
             role_icon_url = role_icon_url[:role_icon_url.find("?size=")]
         
@@ -85,7 +86,7 @@ def create_message_image(text, author, created_at):
     else:
         role_icon = None
 
-# Create a draw object for the image
+    # Create a draw object for the image
     draw = ImageDraw.Draw(image)
 
     # Draw the username and message text onto the image
