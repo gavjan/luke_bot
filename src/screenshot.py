@@ -20,8 +20,21 @@ username_font = ImageFont.truetype("dejavu-sans.ttf", 16)
 date_font = ImageFont.truetype("dejavu-sans.ttf", 11)
 
 
+def parse_text(message):
+    text = message.content
+    while True:
+        match = re.search(r"<@([0-9]+)>", text)
+        if not match: break
 
-def create_message_image(text, author, created_at):
+        user = message.guild.get_member(int(match[1]))
+        text = text.replace(match[0], f"@{user.nick or user.name}")
+    return text
+
+def create_message_image(message):
+    text = parse_text(message)
+    author = message.author
+    created_at = message.created_at
+    
     global BACKGROUND_COLOR, TEXT_COLOR, DATE_COLOR, IMAGE_WIDTH, IMAGE_HEIGHT, pfp_size, pfp_padding, wrap
 
     # Create a new image
@@ -74,7 +87,6 @@ def create_message_image(text, author, created_at):
     # Load the role icon if it exists
     if has_custom_icon and highest_role.display_icon.url:
         role_icon_url = highest_role.display_icon.url
-        print(f"{role_icon_url=}")
         if "?size=" in role_icon_url:
             role_icon_url = role_icon_url[:role_icon_url.find("?size=")]
         
