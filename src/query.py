@@ -1,12 +1,14 @@
-from cons import load_json, actions, ADMIN_IDS, TUS_ID, TUS_THREAD_ID, SEED, COUNT_ID, START_DATE, err_exit, load_page, rm_message, STRUK_ID
+import random
+import re
 from datetime import date, datetime
 from itertools import groupby
-from screenshot import create_message_image
+
+import discord
 from discord.utils import get
 
-import re
-import discord
-import random
+from cons import load_json, actions, ADMIN_IDS, TUS_ID, TUS_THREAD_ID, SEED, COUNT_ID, START_DATE, err_exit, load_page, \
+    rm_message, STRUK_ID
+from screenshot import create_message_image
 
 new_embed = None
 old_embed = None
@@ -294,7 +296,7 @@ async def tus_moment(client, message):
         sent_msg = await tus_thread.send(ref_message.jump_url, file=discord.File(f))
     
     emoji = get(client.emojis, name="tus")
-    await sent_msg.add_reaction(emoji or emoji_id)
+    await sent_msg.add_reaction(emoji)
     
     return actions.REACT, ["✅"]
 
