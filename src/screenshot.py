@@ -1,15 +1,18 @@
 import re
-import discord
-import requests
 import textwrap
-from datetime import datetime
-from PIL import Image, ImageDraw, ImageFont, ImageOps
+from datetime import timezone
 from io import BytesIO
+
+import discord
+import pytz
+import requests
+from PIL import Image, ImageDraw, ImageFont, ImageOps
+
 from cons import *
 
-BACKGROUND_COLOR = (48,51,56)
-TEXT_COLOR = (218,222,225)
-DATE_COLOR = (147,155,163)
+BACKGROUND_COLOR = (48, 51, 56)
+TEXT_COLOR = (218, 222, 225)
+DATE_COLOR = (147, 155, 163)
 IMAGE_WIDTH = 450
 IMAGE_HEIGHT = 70
 pfp_size = 40
@@ -25,27 +28,29 @@ def parse_text(message):
     text = message.content
     while True:
         match = re.search(r"<@([0-9]+)>", text)
-        if not match: break
+        if not match:
+            break
 
         user = message.guild.get_member(int(match[1]))
         text = text.replace(match[0], f"@{user.nick or user.name}")
     return text
 
+
 def create_message_image(message):
     text = parse_text(message)
     author = message.author
     created_at = message.created_at
+    timezone_yerevan = pytz.timezone("Asia/Yerevan")
+    created_at.replace(tzinfo=timezone.utc).astimezone(tz=timezone_yerevan)
 
     if author.id == OLD_TUS_ID:
         author = message.guild.get_member(TUS_ID)
 
-    
     global BACKGROUND_COLOR, TEXT_COLOR, DATE_COLOR, IMAGE_WIDTH, IMAGE_HEIGHT, pfp_size, pfp_padding, wrap
     IMAGE_HEIGHT = 70
 
     # Create a new image
     image = Image.new('RGB', (IMAGE_WIDTH, IMAGE_HEIGHT), color = BACKGROUND_COLOR)
-
 
     # Calculate overall height
     draw = ImageDraw.Draw(image)
@@ -63,7 +68,6 @@ def create_message_image(message):
     if message.author.id == OLD_TUS_ID:
         response = requests.get(OLD_TUS_PFP_URL)
     profile_picture = Image.open(BytesIO(response.content))
-
 
     # Add alpha channel to the image
     profile_picture = profile_picture.convert("RGBA")
@@ -86,9 +90,6 @@ def create_message_image(message):
     # Get the role color
     role_color = highest_role.color.to_rgb()
 
-    
-
-
     # Check if the role has a custom icon
     has_custom_icon = highest_role.display_icon is not None
 
@@ -97,7 +98,6 @@ def create_message_image(message):
         role_icon_url = highest_role.display_icon.url
         if "?size=" in role_icon_url:
             role_icon_url = role_icon_url[:role_icon_url.find("?size=")]
-        
 
         response = requests.get(f"{role_icon_url}?size=20")
         role_icon = Image.open(BytesIO(response.content))
@@ -135,9 +135,6 @@ def create_message_image(message):
     image.save('message.png')
 
 
-
-
-    
 if __name__ == "__main__":
     client = discord.Client(intents=discord.Intents.all())
 

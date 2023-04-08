@@ -1,10 +1,11 @@
-from cons import *
-from query import parse_query, daily_verse, todays_holiday, process_reaction
-from datetime import datetime, time, timedelta
+from datetime import time
+
+import discord
 from discord.ext import commands
 from discord.utils import get
-import asyncio
-import discord
+
+from cons import *
+from query import parse_query, process_reaction
 
 
 def main():

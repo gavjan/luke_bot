@@ -1,10 +1,11 @@
 import enum
-import os
 import json
+import os
 import sys
-from bs4 import BeautifulSoup as soup
-from urllib.request import Request, urlopen
 from urllib.parse import quote
+from urllib.request import Request, urlopen
+
+from bs4 import BeautifulSoup as soup
 
 ADMIN_IDS = [213341816324489217, 209687706349993985, 803982632554594335]
 TUS_ID = 1013336977359245397
