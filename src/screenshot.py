@@ -41,7 +41,7 @@ def create_message_image(message):
     author = message.author
     created_at = message.created_at
     timezone_yerevan = pytz.timezone("Asia/Yerevan")
-    created_at.replace(tzinfo=timezone.utc).astimezone(tz=timezone_yerevan)
+    created_at = created_at.replace(tzinfo=timezone.utc).astimezone(tz=timezone_yerevan)
 
     if author.id == OLD_TUS_ID:
         author = message.guild.get_member(TUS_ID)
