@@ -132,3 +132,4 @@ dmypy.json
 # Project Specific
 src/.err_file
 *.html
+src/message.png
