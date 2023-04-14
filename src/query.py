@@ -289,16 +289,14 @@ async def tus_moment(client, message):
         return actions.REACT, ["❓"]
 
     ref_message = await message.channel.fetch_message(message.reference.message_id)
-    create_message_image(ref_message)
+    create_message_image(client, ref_message)
 
     tus_thread = await client.fetch_channel(TUS_THREAD_ID)
-    sent_msg = None
     with open('message.png', 'rb') as f:
         sent_msg = await tus_thread.send(ref_message.jump_url, file=discord.File(f))
-        emoji = get(client.emojis, name="tus")
-        await sent_msg.add_reaction(emoji)
     
-    
+    emoji = get(client.emojis, name="tus")
+    await sent_msg.add_reaction(emoji)
     
     return actions.REACT, ["✅"]
 

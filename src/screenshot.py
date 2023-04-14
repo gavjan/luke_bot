@@ -2,6 +2,7 @@ import re
 import textwrap
 from datetime import timezone
 from io import BytesIO
+from discord.utils import get
 
 import discord
 import pytz
@@ -15,6 +16,7 @@ TEXT_COLOR = (218, 222, 225)
 DATE_COLOR = (147, 155, 163)
 IMAGE_WIDTH = 450
 IMAGE_HEIGHT = 70
+EMOJI_WIDTH = 5
 pfp_size = 40
 pfp_padding = 65
 wrap = 40
@@ -24,8 +26,37 @@ username_font = ImageFont.truetype("dejavu-sans.ttf", 16)
 date_font = ImageFont.truetype("dejavu-sans.ttf", 11)
 
 
-def parse_text(message):
+def draw_image_url(image, url, x, y):
+    SIZE = 20
+    draw = ImageDraw.Draw(image)
+    emoji_width = draw.textsize(' ' * EMOJI_WIDTH, font=text_font)[0]
+
+    response = requests.get(url, f"{url}?size={SIZE}")
+    emoji_image = Image.open(BytesIO(response.content)).convert("RGBA")
+    
+    # Resize image
+    width, height = (emoji_image.size)
+    ratio = 20/max(width, height)
+    width = int(width*ratio)
+    height = int(height*ratio)
+    emoji_image = emoji_image.resize((width, height))
+
+
+    mask = emoji_image.split()[-1]
+    emoji_image.putalpha(mask)
+
+    x += (10 - width//2)
+    y += (10 - height//2)
+
+    image.paste(emoji_image, (x-emoji_width, y), emoji_image)
+
+
+def parse_text(client, message, emojis={}):
+    global IMAGE_HEIGHT
+    image_height = IMAGE_HEIGHT
     text = message.content
+    
+    # Parse Mentions
     while True:
         match = re.search(r"<@([0-9]+)>", text)
         if not match:
@@ -33,39 +64,42 @@ def parse_text(message):
 
         user = message.guild.get_member(int(match[1]))
         text = text.replace(match[0], f"@{user.nick or user.name}")
-    return text
+    
+    # Parse Emojis
+    while True:
+        match = re.search(r"<a?:([0-9a-zA-Z_-]+):([0-9]+)>", text)
+        if not match:
+            break
 
+        name = match[1]
+        emoji = get(client.emojis, name=name)
+        emojis[name] = emoji.url
 
-def create_message_image(message):
-    text = parse_text(message)
-    author = message.author
-    created_at = message.created_at
-    timezone_yerevan = pytz.timezone("Asia/Yerevan")
-    created_at = created_at.replace(tzinfo=timezone.utc).astimezone(tz=timezone_yerevan)
+        text = text.replace(match[0], f":{name}:")
 
-    if author.id == OLD_TUS_ID:
-        author = message.guild.get_member(TUS_ID)
-
-    global BACKGROUND_COLOR, TEXT_COLOR, DATE_COLOR, IMAGE_WIDTH, IMAGE_HEIGHT, pfp_size, pfp_padding, wrap
-    IMAGE_HEIGHT = 70
-
-    # Create a new image
-    image = Image.new('RGB', (IMAGE_WIDTH, IMAGE_HEIGHT), color = BACKGROUND_COLOR)
-
-    # Calculate overall height
+    
+    # Wrap text and parse newlines
+    image = Image.new('RGB', (IMAGE_WIDTH, image_height), color = BACKGROUND_COLOR)
     draw = ImageDraw.Draw(image)
     sum_height = 0
-    lines = textwrap.wrap(text, width=wrap)
-    for line in lines:
-        sum_height += draw.textsize(line, font=text_font)[1]
+    text_lines = []
+    for line in text.split('\n'):
+        for wrapped_line in textwrap.wrap(line, width=wrap):
+            text_lines.append(wrapped_line)
+            sum_height += draw.textsize(wrapped_line, font=text_font)[1]
+    
+    # Update image_height
+    if len(text_lines) > 1:
+        image_height += sum_height
+    
+    return text_lines, image_height
 
-    if len(lines) > 1:
-        IMAGE_HEIGHT += sum_height
-        image = Image.new('RGB', (IMAGE_WIDTH, IMAGE_HEIGHT), color = BACKGROUND_COLOR)
+   
 
-    # Load the profile picture
-    response = requests.get(author.avatar.url)
-    if message.author.id == OLD_TUS_ID:
+def paste_profile_pic(image, url, author_id):
+    response = requests.get(url)
+
+    if author_id == OLD_TUS_ID:
         response = requests.get(OLD_TUS_PFP_URL)
     profile_picture = Image.open(BytesIO(response.content))
 
@@ -84,6 +118,7 @@ def create_message_image(message):
     # Paste the profile picture onto the image
     image.paste(profile_picture, (10, 10), mask)
 
+def draw_role_and_date(image, author, created_at):
     # Get the user's highest role
     highest_role = author.top_role
 
@@ -111,7 +146,7 @@ def create_message_image(message):
 
     # Draw the username and message text onto the image
     username = author.display_name
-    if message.author.id == OLD_TUS_ID:
+    if author.id == OLD_TUS_ID:
         username = "Թուս the Gray Մոմենտ"
     username_width = draw.textsize(username, font=username_font)[0]
     username_color = tuple(role_color)
@@ -125,13 +160,60 @@ def create_message_image(message):
     date = created_at.strftime('%m/%d/%Y %I:%M %p')
     draw.text((pfp_padding + username_width + 7 + (20 if role_icon else 0),14), date, font=date_font, fill=DATE_COLOR)
 
-    text_lines = textwrap.wrap(text, width=wrap)
-    sum_height = 0
-    for line in text_lines:
-        draw.text((pfp_padding+2, 35+sum_height), line + "\n", font=text_font, fill=TEXT_COLOR)
-        sum_height += draw.textsize(line, font=text_font)[1]
 
-    # Save the image
+def draw_message(image, text_lines, emoji_map):
+    sum_height = 0
+    draw = ImageDraw.Draw(image)
+    for line in text_lines:
+        line_height = draw.textsize(line, font=text_font)[1]
+        left_padding = 0
+        while True:
+            match = re.search(r":([0-9a-zA-Z_-]+):", line)
+            if not match:
+                break
+            
+            name = match[1]
+            url = emoji_map[name]
+
+            # Cut everyting before emoji, and leave everything after it
+            before_text, line = line.split(f":{name}:", 1)
+
+            # Draw text before emoji leaving blank space for emoji
+            before_text += (EMOJI_WIDTH * ' ')
+            draw.text((left_padding + pfp_padding+2, 35+sum_height), before_text, font=text_font, fill=TEXT_COLOR)
+            left_padding += draw.textsize(before_text, font=text_font)[0]
+
+            # Paste emoji
+            draw_image_url(image,url, left_padding + pfp_padding + 2, 35 + sum_height)
+
+
+          
+            
+
+
+
+        draw.text((left_padding + pfp_padding+2, 35+sum_height), line + "\n", font=text_font, fill=TEXT_COLOR)
+        sum_height += line_height
+
+
+def create_message_image(client, message):
+    global BACKGROUND_COLOR, TEXT_COLOR, DATE_COLOR, IMAGE_WIDTH, pfp_size, pfp_padding, wrap
+    created_at = message.created_at.replace(tzinfo=timezone.utc).astimezone(tz=pytz.timezone("Asia/Yerevan"))
+    author = message.author
+    if author.id == OLD_TUS_ID:
+        author = message.guild.get_member(TUS_ID)
+    emoji_map = {}
+    text_lines, image_height = parse_text(client, message, emoji_map)
+    
+    image = Image.new('RGB', (IMAGE_WIDTH, image_height), color = BACKGROUND_COLOR)
+    
+
+    paste_profile_pic(image, author.avatar.url, message.author.id)
+
+    draw_role_and_date(image, author, created_at)
+
+    draw_message(image, text_lines, emoji_map)
+
     image.save('message.png')
 
 
