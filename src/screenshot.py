@@ -84,7 +84,11 @@ def parse_text(client, message, emojis={}):
     sum_height = 0
     text_lines = []
     for line in text.split('\n'):
-        for wrapped_line in textwrap.wrap(line, width=wrap):
+        wrapped = textwrap.wrap(line, width=wrap)
+        if not wrapped:
+            wrapped.append(" ")
+        print(wrapped)
+        for wrapped_line in wrapped:
             text_lines.append(wrapped_line)
             sum_height += draw.textsize(wrapped_line, font=text_font)[1]
     
