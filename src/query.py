@@ -6,8 +6,8 @@ from itertools import groupby
 import discord
 from discord.utils import get
 
-from cons import load_json, actions, ADMIN_IDS, TUS_ID, TUS_THREAD_ID, SEED, COUNT_ID, START_DATE, err_exit, load_page, \
-    rm_message, STRUK_ID
+from cons import (load_json, actions, ADMIN_IDS, TUS_ID, TUS_THREAD_ID, SEED, COUNT_ID, START_DATE, err_exit,
+                  load_page, rm_message, STRUK_ID)
 from screenshot import create_message_image
 
 new_embed = None
@@ -250,18 +250,20 @@ def assert_count(txt, author):
     if not counter:
         num = re.match(r"^\d+", txt)
         if not num:
-            return (actions.REACT, ["❓"])
-        if gav(int(num[0]), author): return (actions.REACT, ["🇲", "🇪", "🇸", "⬛", "🇴", "🇳", "🇱", "🇾", "⛔"])
+            return actions.REACT, ["❓"]
+        if gav(int(num[0]), author):
+            return actions.REACT, ["🇲", "🇪", "🇸", "⬛", "🇴", "🇳", "🇱", "🇾", "⛔"]
         counter = (int(num[0]), author)
 
-        return (actions.REACT, ["♻️"])
+        return actions.REACT, ["♻️"]
 
     nums = [int(''.join(i)) for is_digit, i in groupby(txt, str.isdigit) if is_digit]
     if ((counter[0] + 1 not in nums) and ("gif" not in txt)) or author == counter[1]:
-        return (actions.REACT, "😡")
-    if gav(counter[0] + 1, author): return (actions.REACT, ["🇬", "🇦", "🇻", "⬛", "🇴", "🇳", "🇱", "🇾", "⛔"])
+        return actions.REACT, "😡"
+    if gav(counter[0] + 1, author):
+        return actions.REACT, ["🇬", "🇦", "🇻", "⬛", "🇴", "🇳", "🇱", "🇾", "⛔"]
     counter = (counter[0] + 1, author)
-    return (actions.IGNORE, None)
+    return actions.IGNORE, None
 
 
 async def count_stats(client):
@@ -279,9 +281,12 @@ async def count_stats(client):
         msg += f"{k}: {stats[k]}\n"
     return actions.REPLY, msg
 
+
 def pray(text):
     embed = discord.Embed(title="Anonymous Prayer", description=text, color=discord.Color.blue())
     return actions.SEND, embed
+
+
 async def tus_moment(client, message):
     if not message.author.top_role.permissions.administrator:
         return actions.REACT, ["🚫"]
@@ -294,16 +299,17 @@ async def tus_moment(client, message):
     tus_thread = await client.fetch_channel(TUS_THREAD_ID)
     with open('message.png', 'rb') as f:
         sent_msg = await tus_thread.send(ref_message.jump_url, file=discord.File(f))
-    
+
     emoji = get(client.emojis, name="tus")
     await sent_msg.add_reaction(emoji)
-    
-    return actions.REACT, ["✅"]
+
+    return actions.REMOVE, None
+
 
 async def parse_query(query, client, debug=False):
     content = query if debug else query.content
     ret = []
-    #if query.channel.id == COUNT_ID:
+    # if query.channel.id == COUNT_ID:
     #    ret.append(assert_count(content, query.author.id))
     if re.match(r"^\s*/count_stats\s*$", content):
         ret.append((await count_stats(client)))

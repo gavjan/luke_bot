@@ -9,8 +9,8 @@ from query import parse_query, process_reaction
 
 
 def main():
-    WHEN_VERSE = time(16, 0, 0)  # 4 PM UTC
-    WHEN_HOLIDAY = time(4, 0, 0)  # 4 AM UTC
+    when_verse = time(16, 0, 0)  # 4 PM UTC
+    when_holiday = time(4, 0, 0)  # 4 AM UTC
     default_channel_id = 456178384016244738
 
     client = commands.Bot(command_prefix="!", intents=discord.Intents.all())
@@ -63,11 +63,10 @@ def main():
                     await message.reply(response)
                     exit(0)
         except Exception as e:
-            if ignore_errors.has(e.code):
+            if IgnoreErrors.has(e.code):
                 return
 
             err_exit(e)
-
 
     client.run(getenv("bot_token"))
 
