@@ -27,31 +27,31 @@ date_font = ImageFont.truetype("dejavu-sans.ttf", 11)
 
 
 def draw_image_url(image, url, x, y):
-    SIZE = 20
+    size = 20
     draw = ImageDraw.Draw(image)
     emoji_width = draw.textsize(' ' * EMOJI_WIDTH, font=text_font)[0]
 
-    response = requests.get(url, f"{url}?size={SIZE}")
+    response = requests.get(url, f"{url}?size={size}")
     emoji_image = Image.open(BytesIO(response.content)).convert("RGBA")
     
     # Resize image
-    width, height = (emoji_image.size)
-    ratio = 20/max(width, height)
-    width = int(width*ratio)
-    height = int(height*ratio)
+    width, height = emoji_image.size
+    ratio = 20 / max(width, height)
+    width = int(width * ratio)
+    height = int(height * ratio)
     emoji_image = emoji_image.resize((width, height))
-
 
     mask = emoji_image.split()[-1]
     emoji_image.putalpha(mask)
 
-    x += (10 - width//2)
-    y += (10 - height//2)
+    x += (10 - width // 2)
+    y += (10 - height // 2)
 
     image.paste(emoji_image, (x-emoji_width, y), emoji_image)
 
 
-def parse_text(client, message, emojis={}):
+def parse_text(client, message, emojis=None):
+    emojis = {} if emojis is None else emojis
     global IMAGE_HEIGHT
     image_height = IMAGE_HEIGHT
     text = message.content
@@ -77,9 +77,8 @@ def parse_text(client, message, emojis={}):
 
         text = text.replace(match[0], f":{name}:")
 
-    
     # Wrap text and parse newlines
-    image = Image.new('RGB', (IMAGE_WIDTH, image_height), color = BACKGROUND_COLOR)
+    image = Image.new('RGB', (IMAGE_WIDTH, image_height), color=BACKGROUND_COLOR)
     draw = ImageDraw.Draw(image)
     sum_height = 0
     text_lines = []
@@ -98,7 +97,6 @@ def parse_text(client, message, emojis={}):
     
     return text_lines, image_height
 
-   
 
 def paste_profile_pic(image, url, author_id):
     response = requests.get(url)
@@ -121,6 +119,7 @@ def paste_profile_pic(image, url, author_id):
 
     # Paste the profile picture onto the image
     image.paste(profile_picture, (10, 10), mask)
+
 
 def draw_role_and_date(image, author, created_at):
     # Get the user's highest role
@@ -162,7 +161,7 @@ def draw_role_and_date(image, author, created_at):
 
     # Draw the date
     date = created_at.strftime('%m/%d/%Y %I:%M %p')
-    draw.text((pfp_padding + username_width + 7 + (20 if role_icon else 0),14), date, font=date_font, fill=DATE_COLOR)
+    draw.text((pfp_padding + username_width + 7 + (20 if role_icon else 0), 14), date, font=date_font, fill=DATE_COLOR)
 
 
 def draw_message(image, text_lines, emoji_map):
@@ -188,13 +187,7 @@ def draw_message(image, text_lines, emoji_map):
             left_padding += draw.textsize(before_text, font=text_font)[0]
 
             # Paste emoji
-            draw_image_url(image,url, left_padding + pfp_padding + 2, 35 + sum_height)
-
-
-          
-            
-
-
+            draw_image_url(image, url, left_padding + pfp_padding + 2, 35 + sum_height)
 
         draw.text((left_padding + pfp_padding+2, 35+sum_height), line + "\n", font=text_font, fill=TEXT_COLOR)
         sum_height += line_height
@@ -209,8 +202,7 @@ def create_message_image(client, message):
     emoji_map = {}
     text_lines, image_height = parse_text(client, message, emoji_map)
     
-    image = Image.new('RGB', (IMAGE_WIDTH, image_height), color = BACKGROUND_COLOR)
-    
+    image = Image.new('RGB', (IMAGE_WIDTH, image_height), color=BACKGROUND_COLOR)
 
     paste_profile_pic(image, author.avatar.url, message.author.id)
 
