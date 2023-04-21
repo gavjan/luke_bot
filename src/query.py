@@ -279,9 +279,12 @@ async def count_stats(client):
         msg += f"{k}: {stats[k]}\n"
     return actions.REPLY, msg
 
+
 def pray(text):
     embed = discord.Embed(title="Anonymous Prayer", description=text, color=discord.Color.blue())
     return actions.SEND, embed
+
+
 async def tus_moment(client, message):
     if not message.author.top_role.permissions.administrator:
         return actions.REACT, ["🚫"]
@@ -294,16 +297,17 @@ async def tus_moment(client, message):
     tus_thread = await client.fetch_channel(TUS_THREAD_ID)
     with open('message.png', 'rb') as f:
         sent_msg = await tus_thread.send(ref_message.jump_url, file=discord.File(f))
-    
+
     emoji = get(client.emojis, name="tus")
     await sent_msg.add_reaction(emoji)
-    
-    return actions.REACT, ["✅"]
+
+    return actions.REMOVE, None
+
 
 async def parse_query(query, client, debug=False):
     content = query if debug else query.content
     ret = []
-    #if query.channel.id == COUNT_ID:
+    # if query.channel.id == COUNT_ID:
     #    ret.append(assert_count(content, query.author.id))
     if re.match(r"^\s*/count_stats\s*$", content):
         ret.append((await count_stats(client)))
