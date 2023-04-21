@@ -7,6 +7,7 @@ from urllib.request import Request, urlopen
 
 from bs4 import BeautifulSoup as soup
 
+
 ADMIN_IDS = [213341816324489217, 209687706349993985, 803982632554594335]
 TUS_ID = 1013336977359245397
 OLD_TUS_ID = 456226577798135808
@@ -18,7 +19,7 @@ SEED = "LUKE"
 COUNT_ID = 1002183766682390539
 
 
-class ignore_errors(enum.Enum):
+class IgnoreErrors(enum.Enum):
     PERM_ERR_CODE = 50013
     DM_ERR = 50007
     OS_ERR = 5
