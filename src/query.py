@@ -340,7 +340,7 @@ async def parse_query(query, client, debug=False):
         ret.append((actions.REMOVE, None))
     if query.channel.id == TUS_THREAD_ID:
         ret.append((actions.REMOVE, None))
-    elif re.search(r"(\W|_|\d|^)(gn|գն|bg|բգ|gngn|գնգն)(\W|_|\d|$)", content, flags=re.UNICODE | re.IGNORECASE):
+    elif re.search(r"(\W|_|\d|^)(gn|գն|bg|բգ|gngn|գնգն|bgbg|բգբգ)(\W|_|\d|$)", content, flags=re.UNICODE | re.IGNORECASE):
         ret.append((actions.REACT, ["🇬", "🇳", "gandz"]))
     if re.match(r"^s*/restart_luke\s*$", content) and query.author.id in ADMIN_IDS:
         ret.append((actions.EXIT, "ok"))
