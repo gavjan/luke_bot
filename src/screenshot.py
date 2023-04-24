@@ -26,6 +26,15 @@ username_font = ImageFont.truetype("dejavu-sans.ttf", 16)
 date_font = ImageFont.truetype("dejavu-sans.ttf", 11)
 
 
+def resize_to_20(image):
+    width, height = image.size
+    print(image.size)
+    ratio = 20 / max(width, height)
+    width = int(width * ratio)
+    height = int(height * ratio)
+    image = image.resize((width, height))
+    return image, width, height
+
 def draw_image_url(image, url, x, y):
     size = 20
     draw = ImageDraw.Draw(image)
@@ -34,12 +43,7 @@ def draw_image_url(image, url, x, y):
     response = requests.get(url, f"{url}?size={size}")
     emoji_image = Image.open(BytesIO(response.content)).convert("RGBA")
     
-    # Resize image
-    width, height = emoji_image.size
-    ratio = 20 / max(width, height)
-    width = int(width * ratio)
-    height = int(height * ratio)
-    emoji_image = emoji_image.resize((width, height))
+    emoji_image, width, height = resize_to_20(emoji_image)
 
     mask = emoji_image.split()[-1]
     emoji_image.putalpha(mask)
@@ -132,17 +136,29 @@ def draw_role_and_date(image, author, created_at):
     has_custom_icon = highest_role.display_icon is not None
 
     # Load the role icon if it exists
-    if has_custom_icon and highest_role.display_icon.url:
-        role_icon_url = highest_role.display_icon.url
-        if "?size=" in role_icon_url:
-            role_icon_url = role_icon_url[:role_icon_url.find("?size=")]
+    role_icon = None
+    if has_custom_icon:
+        url = None
+        if isinstance(highest_role.display_icon, discord.asset.Asset):    
+            role_icon_url = highest_role.display_icon.url
+            if "?size=" in role_icon_url:
+                role_icon_url = role_icon_url[:role_icon_url.find("?size=")]
+            url = f"{role_icon_url}?size=20"
+            
+        else: # it's probably emoji string then
+            hex_emoji_api = "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72"
+            base = highest_role.display_icon.encode('unicode_escape').decode()
+            hex_emoji = ""
+            for word in re.findall(r'\\U([0-9a-f]+)', base):
+                hex_emoji += word.lstrip('0') + "-"
+            hex_emoji = hex_emoji.rstrip("-")
+            url = f"{hex_emoji_api}/{hex_emoji}.png"
+        
+        response = requests.get(url)
+        role_icon = Image.open(BytesIO(response.content)).convert("RGBA")
+        role_icon, _, _ = resize_to_20(role_icon)
 
-        response = requests.get(f"{role_icon_url}?size=20")
-        role_icon = Image.open(BytesIO(response.content))
-        role_icon_size = role_icon.size
-        role_icon = role_icon.resize(role_icon_size)
-    else:
-        role_icon = None
+  
 
     # Create a draw object for the image
     draw = ImageDraw.Draw(image)
