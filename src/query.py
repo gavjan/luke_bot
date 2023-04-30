@@ -336,8 +336,6 @@ async def parse_query(query, client, debug=False):
         ret.append((actions.REACT, ["🇬", "🇲", "baj"]))
     if query.author.id == TUS_ID:
         ret.append((actions.REACT, ["tus"]))
-    if STRUK_ID in [x.id for x in query.author.roles]:
-        ret.append((actions.REMOVE, None))
     if query.channel.id == TUS_THREAD_ID:
         ret.append((actions.REMOVE, None))
     elif re.search(r"(\W|_|\d|^)(gn|գն|bg|բգ|gngn|գնգն|bgbg|բգբգ)(\W|_|\d|$)", content, flags=re.UNICODE | re.IGNORECASE):
