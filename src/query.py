@@ -9,7 +9,7 @@ from discord.utils import get
 from cons import (load_json, actions, ADMIN_IDS, TUS_ID, TUS_THREAD_ID, SEED, COUNT_ID, START_DATE, err_exit,
                   load_page, rm_message, STRUK_ID)
 from screenshot import create_message_image
-
+from music import handle_music
 new_embed = None
 old_embed = None
 counter = None
@@ -313,6 +313,8 @@ async def parse_query(query, client, debug=False):
     #    ret.append(assert_count(content, query.author.id))
     if re.match(r"^\s*/count_stats\s*$", content):
         ret.append((await count_stats(client)))
+    if re.match(r"^\s*\./", content):
+        ret.append((await handle_music(client, query)))
     if re.match(r"^\s*/pray\s*$", content):
         ret.append((pray(content)))
     if re.match(r"^\s*/tus_moment\s*$", content):

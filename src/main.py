@@ -37,6 +37,7 @@ def main():
                 elif action == actions.REPLY:
                     await message.reply(response)
                 elif action == actions.ERR:
+                    response.color = discord.Color.red()
                     await message.reply(embed=response)
                 elif action == actions.EMBED:
                     await message.channel.send(embed=response)
