@@ -36,7 +36,7 @@ def get_youtube_url(search_query):
             return None
 
 def correct_levitating(query, url):
-    if "levitating" in query:
+    if "levitating" in query.lower():
         return "https://www.youtube.com/watch?v=1j_XvebOg4c"
     return url
 
