@@ -35,6 +35,11 @@ def get_youtube_url(search_query):
         else:
             return None
 
+def correct_levitating(query, url):
+    if "levitating" in query:
+        return "https://www.youtube.com/watch?v=1j_XvebOg4c"
+    return url
+
 
 async def leave(client, message, _):
      for x in client.voice_clients:
@@ -90,6 +95,8 @@ async def play(client, message, voice):
     url = get_youtube_url(query)
     if not url:
         return actions.ERR, discord.Embed(description=f"Couldn't find a youtube video matching your query",)
+    
+    url = correct_levitating(query, url)
 
     ret = await play_url(client, message, voice, url)
     if ret[0] == actions.ERR:
