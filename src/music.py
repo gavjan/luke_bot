@@ -52,6 +52,8 @@ def correct_levitating(query, url):
 
 
 async def leave(client, message, _):
+     global voice_client
+     voice_client = None
      for x in client.voice_clients:
         if x.server_id == message.guild.id:
             await x.disconnect()
