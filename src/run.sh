@@ -1,4 +1,5 @@
-
+#!/bin/bash
+cd /home/cgev/luke_bot/src
 send_mail() {
   echo "Sending error mail..."
   sed -i "s/\"/'/g" .err_file

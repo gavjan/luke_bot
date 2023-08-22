@@ -2,12 +2,13 @@ import random
 import re
 from datetime import date, datetime
 from itertools import groupby
+import subprocess
 
 import discord
 from discord.utils import get
 
-from cons import (load_json, actions, ADMIN_IDS, TUS_ID, TUS_THREAD_ID, SEED, COUNT_ID, START_DATE, err_exit,
-                  load_page, rm_message, STRUK_ID)
+from cons import (load_json, actions, ADMIN_IDS, TUS_ID, TUS_THREAD_ID, SEED, COUNT_ID, START_DATE, GUGL_ID, err_exit,
+                  load_page, rm_message)
 from screenshot import create_message_image
 from music import handle_music
 new_embed = None
@@ -342,10 +343,30 @@ async def parse_query(query, client, debug=False):
         ret.append((actions.REMOVE, None))
     elif re.search(r"(\W|_|\d|^)(gn|գն|bg|բգ|gngn|գնգն|bgbg|բգբգ)(\W|_|\d|$)", content, flags=re.UNICODE | re.IGNORECASE):
         ret.append((actions.REACT, ["🇬", "🇳", "gandz"]))
-    if re.match(r"^s*/restart_luke\s*$", content) and query.author.id in ADMIN_IDS:
+    if re.match(r"^\s*/whitelist\s+", content):
+        ret.append((whitelist(client, query)))
+    if re.match(r"^\s*/restart_luke\s*$", content) and query.author.id in ADMIN_IDS:
         ret.append((actions.EXIT, "ok"))
 
     return ret
+
+def whitelist(client, query):
+    channel = client.get_channel(GUGL_ID)
+    if not channel: return actions.REPLY, "error: #գուգլ was deleted, the universe must be no more"
+      
+    ids = [member.id for member in channel.members]
+    if not query.author.id in ids: return actions.ERR, discord.Embed(description="You don't have permission to do this")
+
+    match = re.search(r"^\s*/whitelist\s+([a-zA-Z0-9_]{2,16})\s*$", query.content)
+    if not match:
+        return actions.ERR, discord.Embed(description="Invalid Minecraft username")
+    user = match.group(1)
+    p = subprocess.run(['mcrcon', '-H', 'localhost', '-P', '25575', '-p', 'hisus',f'whitelist add {user}'],
+                        shell=False, capture_output=True, text=True)
+    if p.returncode != 0:
+        return actions.REPLY, p.stderr
+
+    return actions.REPLY, p.stdout
 
 
 def holiday_on(_date):
