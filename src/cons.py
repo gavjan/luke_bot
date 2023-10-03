@@ -8,7 +8,7 @@ from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup as soup
 
 
-ADMIN_IDS = [213341816324489217, 209687706349993985, 803982632554594335]
+ADMIN_IDS = [213341816324489217, 209687706349993985, 803982632554594335, 696471041958084648]
 TUS_ID = 1013336977359245397
 OLD_TUS_ID = 456226577798135808
 OLD_TUS_PFP_URL = "https://github.com/gavjan/luke_bot/blob/main/src/old_tus_pfp.jpg?raw=true"
