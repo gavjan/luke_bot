@@ -312,8 +312,8 @@ async def parse_query(query, client, debug=False):
     ret = []
     # if query.channel.id == COUNT_ID:
     #    ret.append(assert_count(content, query.author.id))
-    ret, response = handle_term(content, query.author.id)
-    if ret:
+    handle_ret, response = handle_term(content, query.author.id)
+    if handle_ret:
         return [(actions.SEND, response)]
     if re.match(r"^\s*/count_stats\s*$", content):
         ret.append((await count_stats(client)))
