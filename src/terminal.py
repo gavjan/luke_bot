@@ -46,16 +46,18 @@ def handle_command(command, user):
         exit_terminal(user)
         return "exit\n"
     
-
+    sudo = False
     if command.startswith("sudo "):
         if user not in passwords:
             exit_terminal(user)
             return 'Can\'t use sudo, start terminal with: "sudo bash [password]"\nexit\n'
         command = command.replace("sudo ",f"echo {passwords[user]} | sudo -S ")
 
+
     terminals[user].stdin.write(command.strip() + "\n")
     terminals[user].stdin.write("echo >&2 mtvvcbe && echo mtvvcb\n")
-    terminals[user].stdin.write("echo >&2 mtvvcbe\n")
+    if sudo:
+        terminals[user].stdin.write("echo >&2 mtvvcbe\n")
     terminals[user].stdin.flush()
 
     buffer = ""
