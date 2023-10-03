@@ -314,7 +314,7 @@ async def parse_query(query, client, debug=False):
     #    ret.append(assert_count(content, query.author.id))
     handle_ret, response = handle_term(content, query.author.id)
     if handle_ret:
-        response = f"$ {content}\n{response}"
+        response = f"$ {content}\n{response}" if content != "bash" else response
         return [(actions.SEND, f'```{response[-DISCORD_MSG_LIMIT:]}```')]
     if re.match(r"^\s*/count_stats\s*$", content):
         ret.append((await count_stats(client)))
