@@ -40,7 +40,8 @@ def exit_terminal(user):
 
 
 def handle_command(command, user):
-
+    if command.strip() == "clear":
+        return "$ "
     if command.strip() == "exit":
         exit_terminal(user)
         return "exit\n"
@@ -52,10 +53,9 @@ def handle_command(command, user):
             return 'Can\'t use sudo, start terminal with: "sudo bash [password]"\nexit\n'
         command = command.replace("sudo ",f"echo {passwords[user]} | sudo -S ")
 
-    terminals[user].stdin.write(command + "\n")
-    terminals[user].stdin.write("echo mtvvcb\n")
-    terminals[user].stdin.write(">&2 echo mtvvcbe\n")
-
+    terminals[user].stdin.write(command.strip() + "\n")
+    terminals[user].stdin.write("echo >&2 mtvvcbe && echo mtvvcb\n")
+    terminals[user].stdin.write("echo >&2 mtvvcbe\n")
     terminals[user].stdin.flush()
 
     buffer = ""
@@ -65,7 +65,6 @@ def handle_command(command, user):
             break
         else:
             buffer+=line
-    
     err_buffer = ""
     while True:
         line = terminals[user].stderr.readline()
