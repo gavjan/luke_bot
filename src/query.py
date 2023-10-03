@@ -3,7 +3,7 @@ import re
 from datetime import date, datetime
 from itertools import groupby
 import subprocess
-
+from terminal import handle as handle_term
 import discord
 from discord.utils import get
 
@@ -312,6 +312,9 @@ async def parse_query(query, client, debug=False):
     ret = []
     # if query.channel.id == COUNT_ID:
     #    ret.append(assert_count(content, query.author.id))
+    ret, response = handle_term(content, query.author.id)
+    if ret:
+        return [(actions.SEND, response)]
     if re.match(r"^\s*/count_stats\s*$", content):
         ret.append((await count_stats(client)))
     if re.match(r"^\s*\./", content):
