@@ -7,7 +7,7 @@ from terminal import handle as handle_term
 import discord
 from discord.utils import get
 
-from cons import (load_json, actions, ADMIN_IDS, TUS_ID, TUS_THREAD_ID, SEED, COUNT_ID, START_DATE, GUGL_ID, err_exit,
+from cons import (DISCORD_MSG_LIMIT, load_json, actions, ADMIN_IDS, TUS_ID, TUS_THREAD_ID, SEED, COUNT_ID, START_DATE, GUGL_ID, err_exit,
                   load_page, rm_message)
 from screenshot import create_message_image
 from music import handle_music
@@ -314,7 +314,7 @@ async def parse_query(query, client, debug=False):
     #    ret.append(assert_count(content, query.author.id))
     handle_ret, response = handle_term(content, query.author.id)
     if handle_ret:
-        return [(actions.SEND, f"```$ {content}\n{response}```")]
+        return [(actions.SEND, f"```$ {content}\n{response}```"[-DISCORD_MSG_LIMIT:])]
     if re.match(r"^\s*/count_stats\s*$", content):
         ret.append((await count_stats(client)))
     if re.match(r"^\s*\./", content):
