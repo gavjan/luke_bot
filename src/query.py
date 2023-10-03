@@ -314,7 +314,7 @@ async def parse_query(query, client, debug=False):
     #    ret.append(assert_count(content, query.author.id))
     handle_ret, response = handle_term(content, query.author.id)
     if handle_ret:
-        return [(actions.SEND, f"```{response}```")]
+        return [(actions.SEND, f"```$ {content}\n{response}```")]
     if re.match(r"^\s*/count_stats\s*$", content):
         ret.append((await count_stats(client)))
     if re.match(r"^\s*\./", content):
