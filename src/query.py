@@ -204,11 +204,10 @@ def hisus_bd_reply():
         return actions.IGNORE, None
 def zatik_reply():
     t = date.today()
-    if (t.year, t.month, t.day) == calculate_easter(t.year):
+    if (t.year, t.month, t.day) == calc_easter(t.year):
         return actions.REPLY, "Օրհնյալ է Հարությունը Քրիստոսի"
     else:
         return actions.IGNORE, None
-
 
 
 async def process_reaction(client, players, payload):
