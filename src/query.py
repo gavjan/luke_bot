@@ -178,13 +178,37 @@ def daily_verse():
     embed.title = "Այսօրվա համար՝ " + embed.title
     return actions.EMBED, embed
 
+def calc_easter(year):
+    # Based O(1) algorithm for calculating easter
+    a = year % 19
+    b = year // 100
+    c = year % 100
+    d = b // 4
+    e = b % 4
+    f = (b + 8) // 25
+    g = (b - f + 1) // 3
+    h = (19 * a + b - d - g + 15) % 30
+    i = c // 4
+    k = c % 4
+    l = (32 + 2 * e + 2 * i - h - k) % 7
+    m = (a + 11 * h + 22 * l) // 451
+    month = (h + l - 7 * m + 114) // 31
+    day = ((h + l - 7 * m + 114) % 31) + 1
+    return year, month, day
 
-def zatik_reply():
+def hisus_bd_reply():
     t = date.today()
-    if (t.day, t.month) in [(5, 1), (6, 1)]:
+    if (t.day, t.month, t) in [(5, 1), (6, 1)]:
         return actions.REPLY, "Ձեզ և մեզ մեծ Ավետիս"
     else:
         return actions.IGNORE, None
+def zatik_reply():
+    t = date.today()
+    if (t.year, t.month, t.day) == calculate_easter(t.year):
+        return actions.REPLY, "Օրհնյալ է Հարությունը Քրիստոսի"
+    else:
+        return actions.IGNORE, None
+
 
 
 async def process_reaction(client, players, payload):
@@ -334,8 +358,11 @@ async def parse_query(query, client, debug=False):
         ret.append((parse_verse(content)))
     if re.search(r"\b(amen|ամեն)\b", content, re.IGNORECASE):
         ret.append((actions.REPLY, "Ամեն :pray:"))
-    if re.search(r"\b(qristos|քրիստոս)\s+(ծնվեց|tsnvec|cnvec|ծնավ|tsnav|cnav)\s*(և|ev|եւ)\s+(հայտնեցավ|haytnecav)\b",
+    if re.search(r"\b(qristos|քրիստոս)\s+(հարյավ|հարեավ|haryav|hareav)\s*(ի|i)\s+(մեռելոց|mereloc)\b",
                  content, re.IGNORECASE):
+        ret.append((hisus_bd_reply()))
+    if re.search(r"\b(qristos|քրիստոս)\s+(ծնվեց|tsnvec|cnvec|ծնավ|tsnav|cnav)\s*(և|ev|եւ)\s+(հայտնեցավ|haytnecav)\b",
+                content, re.IGNORECASE):
         ret.append((zatik_reply()))
     if re.search(r"\b(nigger|նիգգեռ)\b", content, re.IGNORECASE):
         ret.append((banned_word(query)))
