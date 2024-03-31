@@ -360,10 +360,10 @@ async def parse_query(query, client, debug=False):
         ret.append((actions.REPLY, "Ամեն :pray:"))
     if re.search(r"\b(qristos|քրիստոս)\s+(հարյավ|հարեավ|haryav|hareav)\s*(ի|i)\s+(մեռելոց|mereloc)\b",
                  content, re.IGNORECASE):
-        ret.append((hisus_bd_reply()))
+        ret.append((zatik_reply()))
     if re.search(r"\b(qristos|քրիստոս)\s+(ծնվեց|tsnvec|cnvec|ծնավ|tsnav|cnav)\s*(և|ev|եւ)\s+(հայտնեցավ|haytnecav)\b",
                 content, re.IGNORECASE):
-        ret.append((zatik_reply()))
+        ret.append((hisus_bd_reply()))
     if re.search(r"\b(nigger|նիգգեռ)\b", content, re.IGNORECASE):
         ret.append((banned_word(query)))
     if re.search(r"(\W|_|\d|^)(gm|գմ|gmgm|գմգմ)(\W|_|\d|$)", content, flags=re.UNICODE | re.IGNORECASE):
