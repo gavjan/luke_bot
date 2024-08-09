@@ -1,41 +1,80 @@
 import discord
 import re
 from cons import *
-from discord.utils import get
-
 import yt_dlp as youtube_dl
 import asyncio
-import time
+from ytmusicapi import YTMusic # https://github.com/sigma67/ytmusicapi
 
 
 queues = {}
 voice_clients = {}
 now_playing_msg = {}
 
+def yt_playlist_to_urls(playlist_id):
+    ytmusic = YTMusic()
+    playlist = ytmusic.get_playlist(playlist_id)
+    video_ids = [item['videoId'] for item in playlist['tracks']]
+    
+    video_urls = []
+    for video_id in video_ids:
+        video_url = f'https://www.youtube.com/watch?v={video_id}'
+        video_urls.append(video_url)
+    
+    return video_urls
+
 
 def parse_youtube_link(query):
-    youtube_re = r'((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|live\/|v\/)?)([\w\-]+)(\S+)?'
-    match = re.search(youtube_re, query)
+    youtube_re = r'((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?(v|list)=|embed\/|live\/|v\/)?)([\w\-]+)(\S+)?'
+    yt_match = re.search(youtube_re, query)
     
-    if match:
+    # Parse Youtube Links
+    if yt_match:
         parsed =  {
-            "protocol": match.group(1),
-            "subdomain": match.group(2),
-            "domain": match.group(3),
-            "is_nocookie": bool(match.group(4)),
-            "path": match.group(5),
-            "video_id": match.group(6),
-            "query_string": match.group(7)
+            "protocol": yt_match.group(1),
+            "subdomain": yt_match.group(2),
+            "domain": yt_match.group(3),
+            "is_nocookie": bool(yt_match.group(4)),
+            "path": yt_match.group(5),
+            "path_val": yt_match.group(6),
+            "val_id": yt_match.group(7),
+            "query_string": yt_match.group(8)
         }
-        return f'https://www.youtube.com/watch?v={parsed["video_id"]}"'
+        if parsed["path"] == "/playlist?list=":
+            return yt_playlist_to_urls(parsed["val_id"])
+        elif parsed["path"] == "/watch?v=":
+            return [f'https://www.youtube.com/watch?v={parsed["val_id"]}"']
     
     
-    # Leave only search query
+    # Parse music search query
     match = re.match(r"^\s*\./play\s+", query)
-    query = query[match.end():]
+    if match:
+        query = query[match.end():]
+        return [get_youtube_url(query)]
 
-    return get_youtube_url(query)
-    
+    # Parse video search query
+    match = re.match(r"^\s*\./play_song\s+", query)
+    if match:
+        query = query[match.end():]
+        return [get_music_url(query)]
+
+def get_music_url(query):
+    try:
+        ytmusic = YTMusic()
+        search_results = ytmusic.search(query, filter="songs")
+
+        if not search_results:
+            # Fallback to video search
+            get_youtube_url(query)
+
+        video_id = search_results[0]['videoId']
+        video_url = f"https://www.youtube.com/watch?v={video_id}"
+        return video_url
+
+    except Exception as e:
+        print("ERROR when searching with YTMusic. Using video search for fallback")
+        return get_youtube_url(query)
+
+
 def get_youtube_url(search_query):
     ydl_opts = {
         'default_search': 'ytsearch1',
@@ -53,18 +92,23 @@ def int_to_emojis(num):
     digit_emojis = ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
     if 0 <= num < 10:
         return [digit_emojis[num]]
-    return ['🔟', '➕']
+    if 10 <= num < 20:
+        return ['🔟', '➕']
+    if 20 <= num < 100:
+        return [digit_emojis[num//10], '0️⃣']
+    return ['💯', '➕']
 
 async def play(client, message, voice):
-    url = parse_youtube_link(message.content)
+    urls = parse_youtube_link(message.content)
     id = message.guild.id
 
-    if not url:
+    if not urls:
         return actions.ERR, discord.Embed(description=f"Couldn't find a song on youtube matching your query",)
 
     if id not in voice_clients or not voice_clients[id].is_connected:
-        return await join(client, message, voice, url)
-    await queues[id].put(url)
+        return await join(client, message, voice, urls)
+    for url in urls:
+        await queues[id].put(url) 
 
     return actions.REACT, ["📥"] + int_to_emojis(queues[id].qsize())
 
@@ -93,14 +137,18 @@ async def play_url(vc, url):
         'youtube_include_dash_manifest': False,
     }
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        info_dict = ydl.extract_info(url, download=False)
+        try:
+            info_dict = ydl.extract_info(url, download=False)
+        except Exception as e:
+            return False
         audio_url = info_dict.get("url", None)
 
     audio_source = discord.FFmpegPCMAudio(audio_url)
     
     vc.play(audio_source)
+    return True
 
-async def join(client, message, voice, url_to_play=None):
+async def join(client, message, voice, urls_to_play=None):
         id = message.guild.id
         perms = voice.channel.permissions_for(message.guild.me)
         if not perms.connect:
@@ -114,15 +162,21 @@ async def join(client, message, voice, url_to_play=None):
             voice_clients[id] = await voice.channel.connect()
         
         queues[id] = asyncio.Queue()
-        if url_to_play is not None:
-            await queues[id].put(url_to_play)
+        if urls_to_play is not None and urls_to_play:
+            for url in urls_to_play:
+                await queues[id].put(url)
         
         while True:
             url = await queues[id].get()
             if url == "kys":
                 return (actions.IGNORE, None)
 
-            await play_url(voice_clients[id], url)
+            if not await play_url(voice_clients[id], url):
+                await leave(client, message, voice)
+                return actions.ERR, discord.Embed(
+                    description=f"Can't play {url}.\nUnsupported format\nKilling the player"
+                )
+
             now_playing = await message.channel.send(f" Now playing {url}")
             
             # Wait until playback finishes
@@ -130,7 +184,6 @@ async def join(client, message, voice, url_to_play=None):
                 await asyncio.sleep(1) # Father forgive me for I have sinned
             await now_playing.delete()
 
-        await leave()
         return actions.SEND, "Idle timeout; Leaving vc."
     
 
@@ -152,20 +205,19 @@ def get_help(commands, vc_commands):
 async def handle_music(client, message):
     voice = message.author.voice
     commands = [
-        (r"^\s*\./leave\s*$", leave, "Leave (mean)"),
         (r"^\s*\./join\s*$", join, "Join your voice channel"),
     ]
     vc_commands = [ 
          (r"^\s*\./play\s+", play, "Play song from [link] or Youtube Title"),
+         (r"^\s*\./play_song\s+", play, "Similar to ./play but using YTMusic for search (use this for music videos with background noise)"),
+         (r"^\s*\./leave\s*$", leave, "Leave (mean)"),
+ #        (r"^\s*\./queue\s*$", get_queue, "See the songs queue"),
          (r"^\s*\./(skip|next)\s*$", skip, "Skip to next song in queue")
     ]
     for rgx, func, _ in commands:
         if re.match(rgx, message.content):
             return await func(client, message, voice)
 
-    #if re.match(r"^\s*\./join\s*$", message.content):
-        #asyncio.create_task(join(client, message, voice))
-    #    return actions.IGNORE, _
     if re.match(r"^\s*\./help\s*$", message.content):
         return get_help(commands, vc_commands)
 
