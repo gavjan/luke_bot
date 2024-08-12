@@ -88,13 +88,13 @@ def parse_query(query):
     if sp_queries: return sp_queries
 
     # Parse video search query
-    match = re.match(r"^\s*\./play\s+", query)
+    match = re.match(r"^\s*\./play_video\s+", query)
     if match:
         query = query[match.end():]
         return [get_youtube_url(query)]
 
     # Parse music search query
-    match = re.match(r"^\s*\./play_song\s+", query)
+    match = re.match(r"^\s*\./play\s+", query)
     if match:
         query = query[match.end():]
         return [get_music_url(query)]
@@ -261,7 +261,7 @@ async def handle_music(client, message):
     ]
     vc_commands = [ 
          (r"^\s*\./play\s+", play, "Play song; Provide song name or Spotify/Youtube playlist or song links"),
-         (r"^\s*\./play_song\s+", play, "Similar to ./play but using YTMusic for search (use this for music videos with background noise)"),
+         (r"^\s*\./play_video\s+", play, "Similar to ./play but search for YouTube video version instead"),
          (r"^\s*\./leave\s*$", leave, "Leave (mean)"),
  #        (r"^\s*\./queue\s*$", get_queue, "See the songs queue"),
          (r"^\s*\./(skip|next)\s*$", skip, "Skip to next song in queue")
