@@ -3,6 +3,7 @@ import re
 from cons import *
 import yt_dlp as youtube_dl
 import asyncio
+from discord.utils import get
 from ytmusicapi import YTMusic # https://github.com/sigma67/ytmusicapi
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -151,7 +152,7 @@ async def play(client, message, voice):
     for url in urls:
         await queues[id].put(url) 
 
-    return actions.REACT, ["📥"] + int_to_emojis(queues[id].qsize())
+    return actions.REACT, ['📥'] + int_to_emojis(queues[id].qsize())
 
 
 async def leave(client, message, _):
@@ -204,9 +205,17 @@ async def join(client, message, voice, urls_to_play=None):
         
         queues[id] = asyncio.Queue()
         if urls_to_play is not None and urls_to_play:
+            emojis = ['✅']
+            if len(urls_to_play) > 1:
+                emojis += ['📥'] + int_to_emojis(len(urls_to_play) - 1)
+            
+            for emoji_id in emojis:
+                emoji = get(client.emojis, name=emoji_id)
+                await message.add_reaction(emoji or emoji_id)
+
             for url in urls_to_play:
                 await queues[id].put(url)
-        
+
         while True:
             url = await queues[id].get()
             if url == "kys":
@@ -251,7 +260,7 @@ async def handle_music(client, message):
         (r"^\s*\./join\s*$", join, "Join your voice channel"),
     ]
     vc_commands = [ 
-         (r"^\s*\./play\s+", play, "Play song from [link] or Youtube Title"),
+         (r"^\s*\./play\s+", play, "Play song; Provide song name or Spotify/Youtube playlist or song links"),
          (r"^\s*\./play_song\s+", play, "Similar to ./play but using YTMusic for search (use this for music videos with background noise)"),
          (r"^\s*\./leave\s*$", leave, "Leave (mean)"),
  #        (r"^\s*\./queue\s*$", get_queue, "See the songs queue"),
