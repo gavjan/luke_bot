@@ -48,7 +48,7 @@ def getenv(name):
     f = open(f"../.env/{name}.env", "r")
     val = f.read()
     f.close()
-    return val
+    return val.strip()
 
 
 def assert_folder(name):

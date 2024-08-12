@@ -4,6 +4,10 @@ from cons import *
 import yt_dlp as youtube_dl
 import asyncio
 from ytmusicapi import YTMusic # https://github.com/sigma67/ytmusicapi
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+SP_CLIENT_ID = getenv("spotify_id")
+SP_CLIENT_SECRET = getenv("spotify_secret")
 
 
 queues = {}
@@ -26,32 +30,69 @@ def yt_playlist_to_urls(playlist_id):
 def parse_youtube_link(query):
     youtube_re = r'((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?(v|list)=|embed\/|live\/|v\/)?)([\w\-]+)(\S+)?'
     yt_match = re.search(youtube_re, query)
+    if not yt_match:
+        return None
+    parsed =  {
+        "protocol": yt_match.group(1),
+        "subdomain": yt_match.group(2),
+        "domain": yt_match.group(3),
+        "is_nocookie": bool(yt_match.group(4)),
+        "path": yt_match.group(5),
+        "path_val": yt_match.group(6),
+        "val_id": yt_match.group(7),
+        "query_string": yt_match.group(8)
+    }
+    if parsed["path"] == "/playlist?list=":
+        return yt_playlist_to_urls(parsed["val_id"])
+    elif parsed["path"] == "/watch?v=":
+        return [f'https://www.youtube.com/watch?v={parsed["val_id"]}"']
+
+
+def parse_spotify_link(query):
+    auth_manager = SpotifyClientCredentials(client_id=SP_CLIENT_ID, client_secret=SP_CLIENT_SECRET)
+    sp = spotipy.Spotify(auth_manager=auth_manager)
+
+    spotify_re = r'(?:https?\:\/\/)?open\.spotify\.com\/(playlist|album|track)\/([A-Za-z0-9]+)'
+    sp_match = re.search(spotify_re, query)
+    if not sp_match:
+        return None
+    path = sp_match.group(1)
+    playlist_id = sp_match.group(2)
     
-    # Parse Youtube Links
-    if yt_match:
-        parsed =  {
-            "protocol": yt_match.group(1),
-            "subdomain": yt_match.group(2),
-            "domain": yt_match.group(3),
-            "is_nocookie": bool(yt_match.group(4)),
-            "path": yt_match.group(5),
-            "path_val": yt_match.group(6),
-            "val_id": yt_match.group(7),
-            "query_string": yt_match.group(8)
-        }
-        if parsed["path"] == "/playlist?list=":
-            return yt_playlist_to_urls(parsed["val_id"])
-        elif parsed["path"] == "/watch?v=":
-            return [f'https://www.youtube.com/watch?v={parsed["val_id"]}"']
+    tracks = []
+    if path == "playlist":
+        results = sp.playlist_tracks(playlist_id)
+        for item in results['items']:
+            tracks.append(item['track'])
+    elif path == "album":
+        results = sp.album_tracks(playlist_id)
+        tracks = results['items']
+    elif path == "track":
+        tracks = [sp.track(playlist_id)]
+
+    arr = []
+    for track in tracks:
+        track_name = track['name']
+        artists = [artist['name'] for artist in track['artists']]
+        arr.append(f"{track_name} {' '.join(artists)}")
+
+    return arr
+
+
+def parse_query(query):    
+    yt_urls = parse_youtube_link(query)
+    if yt_urls: return yt_urls
     
-    
-    # Parse music search query
+    sp_queries = parse_spotify_link(query)
+    if sp_queries: return sp_queries
+
+    # Parse video search query
     match = re.match(r"^\s*\./play\s+", query)
     if match:
         query = query[match.end():]
         return [get_youtube_url(query)]
 
-    # Parse video search query
+    # Parse music search query
     match = re.match(r"^\s*\./play_song\s+", query)
     if match:
         query = query[match.end():]
@@ -95,11 +136,11 @@ def int_to_emojis(num):
     if 10 <= num < 20:
         return ['🔟', '➕']
     if 20 <= num < 100:
-        return [digit_emojis[num//10], '0️⃣']
+        return [digit_emojis[num//10], '0️⃣', '➕']
     return ['💯', '➕']
 
 async def play(client, message, voice):
-    urls = parse_youtube_link(message.content)
+    urls = parse_query(message.content)
     id = message.guild.id
 
     if not urls:
@@ -170,6 +211,8 @@ async def join(client, message, voice, urls_to_play=None):
             url = await queues[id].get()
             if url == "kys":
                 return (actions.IGNORE, None)
+            if not url.startswith("https://www.youtube.com/watch?v="):
+                url = get_music_url(url)
 
             if not await play_url(voice_clients[id], url):
                 await leave(client, message, voice)
