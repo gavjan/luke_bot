@@ -23,7 +23,8 @@ def yt_playlist_to_urls(playlist_id):
     video_urls = []
     for video_id in video_ids:
         video_url = f'https://www.youtube.com/watch?v={video_id}'
-        video_urls.append(video_url)
+        if video_id:
+            video_urls.append(video_url)
     
     return video_urls
 
@@ -173,6 +174,8 @@ async def leave(client, message, _):
      
 
 async def play_url(vc, url):    
+    if not url:
+        return False
     ydl_opts = {
         'format': 'best[height<=480]',
         'skip_download': True,
@@ -223,14 +226,13 @@ async def join(client, message, voice, urls_to_play=None):
             if not url.startswith("https://www.youtube.com/watch?v="):
                 url = get_music_url(url)
 
-            if not await play_url(voice_clients[id], url):
-                await leave(client, message, voice)
-                return actions.ERR, discord.Embed(
-                    description=f"Can't play {url}.\nUnsupported format\nKilling the player"
-                )
+            if await play_url(voice_clients[id], url):
+                now_playing = await message.channel.send(f" Now playing {url}")
+            else:
+                err = discord.Embed(description=f"Can't play {url}.\nUnsupported format\nKilling the player")
+                err.color = discord.Color.red()
+                await message.channel.send()
 
-            now_playing = await message.channel.send(f" Now playing {url}")
-            
             # Wait until playback finishes
             while id in voice_clients and voice_clients[id].is_playing():
                 await asyncio.sleep(1) # Father forgive me for I have sinned
