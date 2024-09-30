@@ -177,8 +177,15 @@ async def play_url(vc, url):
     if not url:
         return False
     ydl_opts = {
-        'format': 'best[height<=480]',
+        'format': 'bestaudio/best[height<=480]',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
         'skip_download': True,
+        'prefer_ffmpeg': True,
+        'keepvideo': False,
         'youtube_include_dash_manifest': False,
     }
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
@@ -188,7 +195,7 @@ async def play_url(vc, url):
             return False
         audio_url = info_dict.get("url", None)
 
-    audio_source = discord.FFmpegPCMAudio(audio_url)
+    audio_source = discord.FFmpegPCMAudio(audio_url, before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", options="-vn -buffer_size 64K")
     
     vc.play(audio_source)
     return True
