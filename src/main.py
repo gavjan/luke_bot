@@ -5,7 +5,7 @@ from discord.ext import commands
 from discord.utils import get
 
 from cons import *
-from query import parse_query, process_reaction
+from query import parse_query, process_reaction_add, process_reaction_remove
 
 
 def main():
@@ -21,10 +21,14 @@ def main():
         print(f"started {client}")
 
     players = {}
+    @client.event
+    async def on_raw_reaction_remove(payload):
+        await process_reaction_remove(client, payload)
 
     @client.event
     async def on_raw_reaction_add(payload):
-        await process_reaction(client, players, payload)
+        await process_reaction_add(client, players, payload)
+
 
     @client.event
     async def on_message(message):

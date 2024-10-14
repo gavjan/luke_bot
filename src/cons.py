@@ -2,6 +2,7 @@ import enum
 import json
 import os
 import sys
+import re
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
@@ -18,7 +19,25 @@ SEED = "LUKE"
 COUNT_ID = 1002183766682390539
 GUGL_ID = 456178384016244738
 DISCORD_MSG_LIMIT = 1994
+GAMES = [
+    {"role_id": 555400264790835230,  "names": ["cs", "ցս"]},
+    {"role_id": 651841632286670869,  "names": ["dota", "դոտա"]},
+    {"role_id": 456441520351084550,  "names": ["warzone", "ոռզոն", "fortnite", "ֆորտնայթ"]},
+    {"role_id": 1195070490306429008, "names": ["fifa", "ֆիֆա"]},
+    {"role_id": 1286419763328847922, "names": ["deadlock", "դեդլոք"]},
+]
+names = []
+roles = []
+for game in GAMES:
+    roles.append(f'<@&{game["role_id"]}>')
+    names += game["names"]
 
+roles_pattern = '|'.join(re.escape(role) for role in roles)
+names_pattern = '|'.join(re.escape(name) for name in names)
+names_pattern = r"(\W|_|\d|^)" + f"({names_pattern})" + r"(\W|_|\d|$)"
+
+roles_re = re.compile(roles_pattern)
+names_re = re.compile(names_pattern, re.UNICODE | re.IGNORECASE)
 
 class IgnoreErrors(enum.Enum):
     PERM_ERR_CODE = 50013

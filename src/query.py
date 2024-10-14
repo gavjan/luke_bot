@@ -8,7 +8,7 @@ import discord
 from discord.utils import get
 
 from cons import (DISCORD_MSG_LIMIT, load_json, actions, ADMIN_IDS, TUS_ID, TUS_THREAD_ID, SEED, COUNT_ID, START_DATE, GUGL_ID, err_exit,
-                  load_page, rm_message)
+                  load_page, rm_message, names_re, roles_re)
 from screenshot import create_message_image
 from music import handle_music
 new_embed = None
@@ -209,8 +209,20 @@ def zatik_reply():
     else:
         return actions.IGNORE, None
 
+async def process_reaction_remove(client, payload):
+    for emoji in ["➕", "➖"]:
+        if payload.emoji.name == emoji and payload.user_id != client.user.id:
+            msg = await client.get_channel(payload.channel_id).fetch_message(payload.message_id)
+            desired_reactions = [x for x in msg.reactions if x.emoji == emoji]
+            if not desired_reactions:
+                await msg.add_reaction(emoji)
 
-async def process_reaction(client, players, payload):
+async def process_reaction_add(client, players, payload):
+    for emoji in ["➕", "➖"]:
+        if payload.emoji.name == emoji and payload.user_id != client.user.id:
+            msg = await client.get_channel(payload.channel_id).fetch_message(payload.message_id)
+            await msg.remove_reaction(emoji, client.user)
+
     if payload.emoji.name == "🔁" and payload.member.id in ADMIN_IDS:
         msg = await client.get_channel(payload.channel_id).fetch_message(payload.message_id)
         if any("✅" == r.emoji for r in msg.reactions):
@@ -367,12 +379,14 @@ async def parse_query(query, client, debug=False):
         ret.append((banned_word(query)))
     if re.search(r"(\W|_|\d|^)(gm|գմ|gmgm|գմգմ)(\W|_|\d|$)", content, flags=re.UNICODE | re.IGNORECASE):
         ret.append((actions.REACT, ["🇬", "🇲", "baj"]))
+    if re.search(r"(\W|_|\d|^)(gn|գն|bg|բգ|gngn|գնգն|bgbg|բգբգ)(\W|_|\d|$)", content, flags=re.UNICODE | re.IGNORECASE):
+        ret.append((actions.REACT, ["🇬", "🇳", "gandz"]))
+    if names_re.search(content) or roles_re.search(content):
+        ret.append((actions.REACT, ["➕", "➖"]))
     if query.author.id == TUS_ID:
         ret.append((actions.REACT, ["tus"]))
     if query.channel.id == TUS_THREAD_ID:
         ret.append((actions.REMOVE, None))
-    elif re.search(r"(\W|_|\d|^)(gn|գն|bg|բգ|gngn|գնգն|bgbg|բգբգ)(\W|_|\d|$)", content, flags=re.UNICODE | re.IGNORECASE):
-        ret.append((actions.REACT, ["🇬", "🇳", "gandz"]))
     if re.match(r"^\s*/whitelist\s+", content):
         ret.append((whitelist(client, query)))
     if re.match(r"^\s*/restart_luke\s*$", content) and query.author.id in ADMIN_IDS:
