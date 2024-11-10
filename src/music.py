@@ -247,6 +247,35 @@ async def join(client, message, voice, urls_to_play=None):
 
         return actions.SEND, "Idle timeout; Leaving vc."
     
+async def handle_vc_change(client, member, before, after):
+    if member != client.user:
+        voice_client = discord.utils.get(client.voice_clients, guild=member.guild)
+        if not voice_client or not voice_client.is_connected():
+            return
+
+        if len(voice_client.channel.members) == 1:
+            voice_client.stop()
+            await voice_client.disconnect()
+            await handle_disconnect(client)
+            print("I was abandoned, disconnecting.")
+
+    if member == client.user and before.channel is not None and after.channel is None:
+        print("I was disconnected")
+        await handle_disconnect(client)
+
+async def handle_disconnect(client):
+    to_del = []
+    for id in voice_clients:
+        for x in client.voice_clients:
+            if x.guild.id == id:
+                return # All good vc is still alive 
+
+        # We were disconnected, wake up music player and tell him to kill himself
+        await queues[id].put("kys")
+        to_del.append(id)
+    
+    for id in to_del:
+        del voice_clients[id]
 
 async def skip(client, message, voice):
     vc = voice_clients[message.guild.id]
@@ -267,11 +296,11 @@ async def handle_music(client, message):
     voice = message.author.voice
     commands = [
         (r"^\s*\./join\s*$", join, "Join your voice channel"),
+        (r"^\s*\./leave\s*$", leave, "Leave (mean)"),
     ]
     vc_commands = [ 
          (r"^\s*\./play\s+", play, "Play song; Provide song name or Spotify/Youtube playlist or song links"),
          (r"^\s*\./play_video\s+", play, "Similar to ./play but search for YouTube video version instead"),
-         (r"^\s*\./leave\s*$", leave, "Leave (mean)"),
  #        (r"^\s*\./queue\s*$", get_queue, "See the songs queue"),
          (r"^\s*\./(skip|next)\s*$", skip, "Skip to next song in queue")
     ]
