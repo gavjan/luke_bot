@@ -295,14 +295,14 @@ def get_help(commands, vc_commands):
 async def handle_music(client, message):
     voice = message.author.voice
     commands = [
-        (r"^\s*\./join\s*$", join, "Join your voice channel"),
         (r"^\s*\./leave\s*$", leave, "Leave (mean)"),
     ]
-    vc_commands = [ 
-         (r"^\s*\./play\s+", play, "Play song; Provide song name or Spotify/Youtube playlist or song links"),
-         (r"^\s*\./play_video\s+", play, "Similar to ./play but search for YouTube video version instead"),
- #        (r"^\s*\./queue\s*$", get_queue, "See the songs queue"),
-         (r"^\s*\./(skip|next)\s*$", skip, "Skip to next song in queue")
+    vc_commands = [
+        (r"^\s*\./join\s*$", join, "Join your voice channel"),
+        (r"^\s*\./play\s+", play, "Play song; Provide song name or Spotify/Youtube playlist or song links"),
+        (r"^\s*\./play_video\s+", play, "Similar to ./play but search for YouTube video version instead"),
+#       (r"^\s*\./queue\s*$", get_queue, "See the songs queue"),
+        (r"^\s*\./(skip|next)\s*$", skip, "Skip to next song in queue")
     ]
     for rgx, func, _ in commands:
         if re.match(rgx, message.content):
