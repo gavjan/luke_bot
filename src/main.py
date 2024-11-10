@@ -6,6 +6,7 @@ from discord.utils import get
 
 from cons import *
 from query import parse_query, process_reaction_add, process_reaction_remove
+from music import handle_vc_change
 
 
 def main():
@@ -19,6 +20,9 @@ def main():
     async def on_ready():
         await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="Holy Music"))
         print(f"started {client}")
+    @client.event
+    async def on_voice_state_update(member, before, after):
+        await handle_vc_change(client, member,  before, after)
 
     players = {}
     @client.event
