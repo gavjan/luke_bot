@@ -264,6 +264,9 @@ async def handle_vc_change(client, member, before, after):
         await handle_disconnect(client)
 
 async def handle_disconnect(client):
+    await asyncio.sleep(1.01) # I paid for my sin.
+    # TODO: Write proper multi-threaded logic to synchronize
+    # with player thread instead of using sleeps like a caveman
     to_del = []
     for id in voice_clients:
         for x in client.voice_clients:
