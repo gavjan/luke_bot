@@ -133,3 +133,4 @@ dmypy.json
 src/.err_file
 *.html
 src/message.png
+src/tts.mp3

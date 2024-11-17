@@ -7,6 +7,7 @@ from discord.utils import get
 from ytmusicapi import YTMusic # https://github.com/sigma67/ytmusicapi
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+import edge_tts
 SP_CLIENT_ID = getenv("spotify_id")
 SP_CLIENT_SECRET = getenv("spotify_secret")
 
@@ -14,6 +15,12 @@ SP_CLIENT_SECRET = getenv("spotify_secret")
 queues = {}
 voice_clients = {}
 now_playing_msg = {}
+
+async def make_tts(text):
+    voice = "en-US-EmmaMultilingualNeural"
+
+    communicate = edge_tts.Communicate(text, voice, volume="+100%")
+    await communicate.save("tts.mp3")
 
 def yt_playlist_to_urls(playlist_id):
     ytmusic = YTMusic()
@@ -173,9 +180,31 @@ async def leave(client, message, _):
     return actions.ERR, discord.Embed(description=f"I'm not in a VC",)
      
 
+async def tts(client, message, voice):
+    id = message.guild.id
+
+    match = re.match(r"^\s*\./tts\s+", message.content)
+    tts_text = message.content[match.end():]
+    url = "tts://" + tts_text
+
+    if id not in voice_clients or not voice_clients[id].is_connected:
+        return await join(client, message, voice, [url])
+
+    await queues[id].put(url)
+
+    return actions.REACT, ['📥'] + int_to_emojis(queues[id].qsize())
+
+def play_local_file(vc):
+    try:
+        vc.play(discord.FFmpegPCMAudio("tts.mp3"))
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
 async def play_url(vc, url):    
     if not url:
-        return False
+        return play_local_file(vc)
     ydl_opts = {
         'format': 'bestaudio/best[height<=480]',
         'postprocessors': [{
@@ -230,10 +259,14 @@ async def join(client, message, voice, urls_to_play=None):
             url = await queues[id].get()
             if url == "kys":
                 return (actions.IGNORE, None)
-            if not url.startswith("https://www.youtube.com/watch?v="):
+            if url.startswith("tts://"):
+                await make_tts(url[6:])
+                url = None
+            if url and not url.startswith("https://www.youtube.com/watch?v="):
                 url = get_music_url(url)
 
             if await play_url(voice_clients[id], url):
+                if not url: url = "Text to Speech"
                 now_playing = await message.channel.send(f" Now playing {url}")
             else:
                 err = discord.Embed(description=f"Can't play {url}.\nUnsupported format\nKilling the player")
@@ -305,7 +338,8 @@ async def handle_music(client, message):
         (r"^\s*\./play\s+", play, "Play song; Provide song name or Spotify/Youtube playlist or song links"),
         (r"^\s*\./play_video\s+", play, "Similar to ./play but search for YouTube video version instead"),
 #       (r"^\s*\./queue\s*$", get_queue, "See the songs queue"),
-        (r"^\s*\./(skip|next)\s*$", skip, "Skip to next song in queue")
+        (r"^\s*\./(skip|next)\s*$", skip, "Skip to next song in queue"),
+        (r"^\s*\./tts\s+", tts, "Play tts text"),
     ]
     for rgx, func, _ in commands:
         if re.match(rgx, message.content):
