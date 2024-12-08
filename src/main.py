@@ -39,6 +39,8 @@ def main():
         try:
             if message.author == client.user:
                 return
+            if message.author.id in BOT_IDS:
+                return
             for action, response in await parse_query(message, client):
                 if action == actions.SEND:
                     await message.channel.send(response)
