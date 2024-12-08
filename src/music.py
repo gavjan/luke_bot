@@ -37,7 +37,7 @@ def yt_playlist_to_urls(playlist_id):
 
 
 def parse_youtube_link(query):
-    youtube_re = r'((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?(v|list)=|embed\/|live\/|v\/)?)([\w\-]+)(\S+)?'
+    youtube_re = r'((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu\.be))(\/(?:[\w\-]+\?(v|list)=|embed\/|live\/|v\/)?)([\w\-]+)(\S+)?'
     yt_match = re.search(youtube_re, query)
     if not yt_match:
         return None
@@ -53,8 +53,8 @@ def parse_youtube_link(query):
     }
     if parsed["path"] == "/playlist?list=":
         return yt_playlist_to_urls(parsed["val_id"])
-    elif parsed["path"] == "/watch?v=":
-        return [f'https://www.youtube.com/watch?v={parsed["val_id"]}"']
+
+    return [f'https://www.youtube.com/watch?v={parsed["val_id"]}"']
 
 
 def parse_spotify_link(query):
