@@ -5,9 +5,12 @@ import yt_dlp as youtube_dl
 import asyncio
 from discord.utils import get
 from ytmusicapi import YTMusic # https://github.com/sigma67/ytmusicapi
+import edge_tts
+
+# Spotipy
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-import edge_tts
+from spotipy.exceptions import SpotifyException
 SP_CLIENT_ID = getenv("spotify_id")
 SP_CLIENT_SECRET = getenv("spotify_secret")
 
@@ -57,27 +60,28 @@ def parse_youtube_link(query):
     return [f'https://www.youtube.com/watch?v={parsed["val_id"]}"']
 
 
-def parse_spotify_link(query):
+def parse_spotify_link(query, spotify_re):
     auth_manager = SpotifyClientCredentials(client_id=SP_CLIENT_ID, client_secret=SP_CLIENT_SECRET)
     sp = spotipy.Spotify(auth_manager=auth_manager)
 
-    spotify_re = r'(?:https?\:\/\/)?open\.spotify\.com\/(playlist|album|track)\/([A-Za-z0-9]+)'
     sp_match = re.search(spotify_re, query)
     if not sp_match:
         return None
     path = sp_match.group(1)
     playlist_id = sp_match.group(2)
-    
-    tracks = []
-    if path == "playlist":
-        results = sp.playlist_tracks(playlist_id)
-        for item in results['items']:
-            tracks.append(item['track'])
-    elif path == "album":
-        results = sp.album_tracks(playlist_id)
-        tracks = results['items']
-    elif path == "track":
-        tracks = [sp.track(playlist_id)]
+    try:
+        tracks = []
+        if path == "playlist":
+            results = sp.playlist_tracks(playlist_id)
+            for item in results['items']:
+                tracks.append(item['track'])
+        elif path == "album":
+            results = sp.album_tracks(playlist_id)
+            tracks = results['items']
+        elif path == "track":
+            tracks = [sp.track(playlist_id)]
+    except SpotifyException as e:
+        return None # Invalid link
 
     arr = []
     for track in tracks:
@@ -88,12 +92,16 @@ def parse_spotify_link(query):
     return arr
 
 
-def parse_query(query):    
+def parse_query(query):
+    # Parse Spotify link
+    spotify_re = r'(?:https?\:\/\/)?open\.spotify\.com\/(playlist|album|track)\/([A-Za-z0-9]+)'
+    match = re.search(spotify_re, query)
+    if match:
+        return parse_spotify_link(query, spotify_re)
+
+    # Parse youtube link
     yt_urls = parse_youtube_link(query)
     if yt_urls: return yt_urls
-    
-    sp_queries = parse_spotify_link(query)
-    if sp_queries: return sp_queries
 
     # Parse video search query
     match = re.match(r"^\s*\./play_video\s+", query)
@@ -153,7 +161,7 @@ async def play(client, message, voice):
     id = message.guild.id
 
     if not urls:
-        return actions.ERR, discord.Embed(description=f"Couldn't find a song on youtube matching your query",)
+        return actions.ERR, discord.Embed(description=f"Couldn't find song or playlist matching your query, sorry 🥺",)
 
     if id not in voice_clients or not voice_clients[id].is_connected:
         return await join(client, message, voice, urls)
