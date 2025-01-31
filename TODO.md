@@ -1,7 +1,19 @@
+- [ ] Detect ./play mismatch
+    - [ ] use lavenshtain distance or python specific diff checks with track name and query
+    - [ ] look for the artist name in the query
+- [ ] Skip Youtube API call for playback
+    - [ ] add plays_tracker.json cache: song_id -> [timestamps of plays] 
+    - [ ] add plays_tracker.json cleanup based on timestamps
+    - [ ] add top songs downloader job based on plays_tracker.json
+    - [ ] adjust player to detect already downloaded songs and skip YT API
+- [ ] Cache Youtube search API calls with self correction
+    - [ ] add query_to_yt_id.json cache: query -> (song_id, last_updated)
+    - [ ] add query_to_yt_id.json cleanup based on really old last_updated 
+    - [ ] add query_to_yt_id.json passive self-correction that returns old result and fetches new one in the background to have it ready for the next call
 - [X] /verse n
 - [X] "amen" hotword
 - [X] /pray
 - [X] daily seeded random verse
-- [ ] ekegheci vc
-- [ ] patarag
+- [X] ekegheci vc
+- [X] patarag
 - [X] qahana.am toner scraper
