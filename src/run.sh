@@ -12,7 +12,7 @@ send_mail() {
   \"From\": \"$(cat ../.env/mail.env)\",
   \"To\": \"$(cat ../.env/mail.env)\",
   \"Subject\": \"[Luke] Bot Error\",
-  \"TextBody\": \"$(cat .err_file)\",
+  \"TextBody\": \"$(cat .err_file | sed ':a;N;$!ba;s/\n/\\n/g')\",
   \"MessageStream\": \"outbound\"
   }"
 }
