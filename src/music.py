@@ -285,7 +285,7 @@ async def join(client, message, voice, urls_to_play=None):
                 if not url: url = "Text to Speech"
                 now_playing = await message.channel.send(f" Now playing {url}")
             else:
-                err_text = f"Caused by: {url}\nPossible problems:\n- Age-Restricted video\n- Unsupported format"
+                err_text = f"Caused by: {url}\nPossible problems:\n- Age-Restricted video\n- Unsupported format\n- YouTube hates me 🥺"
                 err = discord.Embed(title="Player Crashed. Restarting.", description=err_text)
                 err.color = discord.Color.red()
                 await message.channel.send(embed=err)
