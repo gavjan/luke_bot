@@ -57,7 +57,7 @@ def parse_youtube_link(query):
     if parsed["path"] == "/playlist?list=":
         return yt_playlist_to_urls(parsed["val_id"])
 
-    return [f'https://www.youtube.com/watch?v={parsed["val_id"]}"']
+    return [f'https://www.youtube.com/watch?v={parsed["val_id"]}']
 
 
 def parse_spotify_link(query, spotify_re):
@@ -243,12 +243,20 @@ async def join(client, message, voice, urls_to_play=None):
         if not perms.connect:
             err_embed = discord.Embed(title="*No Permission*", description=f"I can't connect to `{voice.channel}`",)
             return actions.ERR, err_embed
-        try:
-            voice_clients[id] = await voice.channel.connect()
-            
-        except discord.ClientException:
-            await leave(client, message, voice)
-            voice_clients[id] = await voice.channel.connect()
+
+        retry_cnt = 0
+        max_retry = 1
+        while(retry_cnt < max_retry):
+            try:
+                voice_clients[id] = await voice.channel.connect()
+                break
+
+            except Exception as e:
+                await leave(client, message, None)
+                retry_cnt += 1
+                if retry_cnt == max_retry:
+                    err_embed = discord.Embed(title="Can't connect to your vc", description=f"{e}")
+                    return actions.ERR, err_embed
         
         queues[id] = asyncio.Queue()
         if urls_to_play is not None and urls_to_play:
@@ -277,9 +285,13 @@ async def join(client, message, voice, urls_to_play=None):
                 if not url: url = "Text to Speech"
                 now_playing = await message.channel.send(f" Now playing {url}")
             else:
-                err = discord.Embed(description=f"Can't play {url}.\nUnsupported format\nKilling the player")
+                err_text = f"Caused by: {url}\nPossible problems:\n- Age-Restricted video\n- Unsupported format"
+                err = discord.Embed(title="Player Crashed. Restarting.", description=err_text)
                 err.color = discord.Color.red()
-                await message.channel.send()
+                await message.channel.send(embed=err)
+
+                await leave(client, message, None)
+                return await join(client, message, voice)
 
             # Wait until playback finishes
             while id in voice_clients and voice_clients[id].is_playing():
