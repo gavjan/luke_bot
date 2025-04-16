@@ -245,7 +245,7 @@ if __name__ == "__main__":
     async def on_message(message):
         if message.author.id == 213341816324489217:
             print(message.content)
-            create_message_image(f"{message.content}", message.author, message.created_at)
+            create_message_image(client, message)
             with open('message.png', 'rb') as f:
                 await message.channel.send(file=discord.File(f))
         
