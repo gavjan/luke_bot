@@ -345,8 +345,8 @@ async def tus_moment(client, message):
 async def parse_query(query, client, debug=False):
     content = query if debug else query.content
     ret = []
-    # if query.channel.id == COUNT_ID:
-    #    ret.append(assert_count(content, query.author.id))
+#    if query.channel.id == COUNT_ID:
+#        ret.append(assert_count(content, query.author.id))
     handle_ret, response = handle_term(content, query.author.id)
     if handle_ret:
         response = f"$ {content}\n{response}" if content != "bash" else response
