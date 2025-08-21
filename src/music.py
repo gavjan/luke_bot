@@ -248,13 +248,13 @@ async def join(client, message, voice, urls_to_play=None):
         max_retry = 1
         while(retry_cnt < max_retry):
             try:
-                voice_clients[id] = await voice.channel.connect()
+                voice_clients[id] = await asyncio.wait_for(voice.channel.connect(), timeout=7)
                 break
 
             except Exception as e:
                 await leave(client, message, None)
                 retry_cnt += 1
-                if retry_cnt == max_retry:
+                if retry_cnt >= max_retry:
                     err_embed = discord.Embed(title="Can't connect to your vc", description=f"{e}")
                     return actions.ERR, err_embed
         
@@ -317,7 +317,7 @@ async def handle_vc_change(client, member, before, after):
         await handle_disconnect(client)
 
 async def handle_disconnect(client):
-    await asyncio.sleep(1.01) # I paid for my sin.
+    await asyncio.sleep(1.01) # Sorry
     # TODO: Write proper multi-threaded logic to synchronize
     # with player thread instead of using sleeps like a caveman
     to_del = []
