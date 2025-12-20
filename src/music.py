@@ -17,8 +17,11 @@ SP_CLIENT_SECRET = getenv("spotify_secret")
 queues = {}
 voice_clients = {}
 now_playing_msg = {}
+now_playing_controls = {}  # (channel_id, msg_id) -> guild_id
 song_selections = {}  # (channel_id, msg_id) -> {"author_id": int, "urls": [str], "original_msg_id": int}
 SONG_EMOJIS = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣']
+CONTROL_SKIP = '⏩'
+CONTROL_STOP = '⏹️'
 
 async def make_tts(text):
     voice = "en-US-EmmaMultilingualNeural"
@@ -339,6 +342,13 @@ async def join(client, message, voice, urls_to_play=None):
             if await play_url(voice_clients[id], url):
                 if not url: url = "Text to Speech"
                 now_playing = await message.channel.send(f" Now playing {url}")
+                # Add playback controls
+                now_playing_controls[(now_playing.channel.id, now_playing.id)] = id
+                try:
+                    await now_playing.add_reaction(CONTROL_STOP)
+                    await now_playing.add_reaction(CONTROL_SKIP)
+                except discord.NotFound:
+                    pass
             else:
                 err_text = f"Caused by: {url}\nPossible problems:\n- 🔞 Age-Restricted video\n- ⛔ Unsupported format\n- 🥺 YouTube hates me"
                 err = discord.Embed(title="Player Crashed. Restarting.", description=err_text)
@@ -351,7 +361,12 @@ async def join(client, message, voice, urls_to_play=None):
             # Wait until playback finishes
             while id in voice_clients and voice_clients[id].is_playing():
                 await asyncio.sleep(1) # Father forgive me for I have sinned
-            await now_playing.delete()
+            # Clean up controls tracking
+            now_playing_controls.pop((now_playing.channel.id, now_playing.id), None)
+            try:
+                await now_playing.delete()
+            except discord.NotFound:
+                pass
 
         return actions.SEND, "Idle timeout; Leaving vc."
     
@@ -392,6 +407,45 @@ async def skip(client, message, voice):
     vc = voice_clients[message.guild.id]
     vc.stop()
     return actions.IGNORE, None
+
+
+async def handle_playback_controls(client, payload):
+    """Handle ⏩ skip and ⏹️ stop reactions on Now Playing message."""
+    # Ignore bot's own reactions
+    if payload.user_id == client.user.id:
+        return
+    
+    k = (payload.channel_id, payload.message_id)
+    
+    if k not in now_playing_controls:
+        return
+    
+    emoji = str(payload.emoji)
+    if emoji not in (CONTROL_SKIP, CONTROL_STOP):
+        return
+    
+    guild_id = now_playing_controls.get(k)
+    if not guild_id:
+        return
+    
+    # Remove immediately to prevent spam
+    now_playing_controls.pop(k, None)
+    
+    if guild_id not in voice_clients:
+        return
+    
+    vc = voice_clients[guild_id]
+    
+    if emoji == CONTROL_SKIP:
+        vc.stop()  # This will trigger the next song in queue
+    elif emoji == CONTROL_STOP:
+        await queues[guild_id].put("kys")
+        if guild_id in voice_clients:
+            del voice_clients[guild_id]
+        for x in client.voice_clients:
+            if x.guild.id == guild_id:
+                await x.disconnect()
+                break
 
 
 async def handle_song_selection(client, payload):

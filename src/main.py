@@ -6,7 +6,7 @@ from discord.utils import get
 
 from cons import *
 from query import parse_query, process_reaction_add, process_reaction_remove
-from music import handle_vc_change, handle_song_selection
+from music import handle_vc_change, handle_song_selection, handle_playback_controls
 
 
 def main():
@@ -32,6 +32,7 @@ def main():
     @client.event
     async def on_raw_reaction_add(payload):
         await handle_song_selection(client, payload)
+        await handle_playback_controls(client, payload)
         await process_reaction_add(client, players, payload)
 
 
