@@ -190,7 +190,9 @@ async def play(client, message, voice):
         
         # Build selection embed
         desc = "\n".join([f"{SONG_EMOJIS[i]} {title[:60]}" for i, (url, title) in enumerate(results)])
-        embed = discord.Embed(title=f"🔍 Results for: {search_query[:50]}", description=desc, color=discord.Color.blue())
+        desc += "\n\n👇React with the corresponding emoji to select a song."
+        embed = discord.Embed(title=f"🔍 {search_query[:50]}", description=desc, color=discord.Color.blue())
+        embed.set_footer(text="hint: you can also just type 1-5 to make a selection")
         
         sent = await message.channel.send(embed=embed)
         urls = [url for url, _ in results]
@@ -497,6 +499,72 @@ async def handle_song_selection(client, payload):
         await queues[guild_id].put(url)
         for emoji in ['📥'] + int_to_emojis(queues[guild_id].qsize()):
             await original_msg.add_reaction(emoji)
+
+
+async def handle_text_selection(client, message):
+    """Handle 1-5 text messages as song selection."""
+    content = message.content.strip()
+    if content not in ('1', '2', '3', '4', '5'):
+        return False
+    
+    idx = int(content) - 1
+    channel_id = message.channel.id
+    author_id = message.author.id
+    
+    # Find pending selection for this user in this channel
+    selection_key = None
+    selection = None
+    for k, v in list(song_selections.items()):
+        if k[0] == channel_id and v["author_id"] == author_id:
+            selection_key = k
+            selection = v
+            break
+    
+    if not selection_key or not selection:
+        return False
+    
+    if idx >= len(selection["urls"]):
+        return False
+    
+    # Remove from selections immediately to prevent race with emoji selection
+    # Use pop to handle case where emoji handler already removed it
+    selection = song_selections.pop(selection_key, None)
+    if not selection:
+        return False  # Already processed by emoji handler
+    
+    url = selection["urls"][idx]
+    guild_id = selection["guild_id"]
+    voice = selection["voice"]
+    original_msg_id = selection["original_msg_id"]
+    
+    # Delete the "1-5" message
+    try:
+        await message.delete()
+    except:
+        pass
+    
+    # Delete selection embed message
+    try:
+        selection_msg = await client.get_channel(selection_key[0]).fetch_message(selection_key[1])
+        await selection_msg.delete()
+    except:
+        pass  # Already deleted
+    
+    # Get original message for context
+    try:
+        original_msg = await client.get_channel(channel_id).fetch_message(original_msg_id)
+    except:
+        return True  # Still consumed the message
+    
+    # Queue the song
+    if guild_id not in voice_clients or not voice_clients[guild_id].is_connected:
+        await join(client, original_msg, voice, [url])
+    else:
+        await queues[guild_id].put(url)
+        for emoji in ['📥'] + int_to_emojis(queues[guild_id].qsize()):
+            await original_msg.add_reaction(emoji)
+    
+    return True  # Message was handled
 
 
 def get_help(commands, vc_commands):

@@ -6,7 +6,7 @@ from discord.utils import get
 
 from cons import *
 from query import parse_query, process_reaction_add, process_reaction_remove
-from music import handle_vc_change, handle_song_selection, handle_playback_controls
+from music import handle_vc_change, handle_song_selection, handle_playback_controls, handle_text_selection
 
 
 def main():
@@ -42,6 +42,9 @@ def main():
             if message.author == client.user:
                 return
             if message.author.id in BOT_IDS:
+                return
+            # Handle quick 1-5 text selection for music
+            if await handle_text_selection(client, message):
                 return
             for action, response in await parse_query(message, client):
                 if action == actions.SEND:
