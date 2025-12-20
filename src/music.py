@@ -4,7 +4,6 @@ from cons import *
 import yt_dlp as youtube_dl
 import asyncio
 from discord.utils import get
-from ytmusicapi import YTMusic # https://github.com/sigma67/ytmusicapi
 import edge_tts
 
 # Spotipy
@@ -18,6 +17,8 @@ SP_CLIENT_SECRET = getenv("spotify_secret")
 queues = {}
 voice_clients = {}
 now_playing_msg = {}
+song_selections = {}  # (channel_id, msg_id) -> {"author_id": int, "urls": [str], "original_msg_id": int}
+SONG_EMOJIS = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣']
 
 async def make_tts(text):
     voice = "en-US-EmmaMultilingualNeural"
@@ -26,17 +27,21 @@ async def make_tts(text):
     await communicate.save("tts.mp3")
 
 def yt_playlist_to_urls(playlist_id):
-    ytmusic = YTMusic()
-    playlist = ytmusic.get_playlist(playlist_id)
-    video_ids = [item['videoId'] for item in playlist['tracks']]
-    
-    video_urls = []
-    for video_id in video_ids:
-        video_url = f'https://www.youtube.com/watch?v={video_id}'
-        if video_id:
-            video_urls.append(video_url)
-    
-    return video_urls
+    """Extract playlist URLs using yt-dlp."""
+    playlist_url = f"https://www.youtube.com/playlist?list={playlist_id}"
+    ydl_opts = {
+        'extract_flat': True,
+        'quiet': True,
+        'no_warnings': True,
+    }
+    try:
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            playlist = ydl.extract_info(playlist_url, download=False)
+            if playlist and 'entries' in playlist:
+                return [f"https://www.youtube.com/watch?v={e['id']}" for e in playlist['entries'] if e and e.get('id')]
+    except Exception as e:
+        print(f"Playlist extraction failed: {e}")
+    return []
 
 
 def parse_youtube_link(query):
@@ -109,28 +114,41 @@ def parse_query(query):
         query = query[match.end():]
         return [get_youtube_url(query)]
 
-    # Parse music search query
+    # Parse music search query - return ("SEARCH", query) for selection
     match = re.match(r"^\s*\./play\s+", query)
     if match:
         query = query[match.end():]
-        return [get_music_url(query)]
+        return ("SEARCH", query)
 
-def get_music_url(query):
+def _search_music_sync(query, max_results=5):
+    """Sync search - run in thread to avoid blocking."""
+    ydl_opts = {
+        'extract_flat': True,  # Only get IDs/titles, not full info
+        'quiet': True,
+        'no_warnings': True,
+    }
     try:
-        ytmusic = YTMusic()
-        search_results = ytmusic.search(query, filter="songs")
-
-        if not search_results:
-            # Fallback to video search
-            get_youtube_url(query)
-
-        video_id = search_results[0]['videoId']
-        video_url = f"https://www.youtube.com/watch?v={video_id}"
-        return video_url
-
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            results = ydl.extract_info(f"ytsearch{max_results}:{query} audio", download=False)
+            if results and 'entries' in results:
+                return [
+                    (f"https://www.youtube.com/watch?v={e['id']}", e.get('title', 'Unknown'))
+                    for e in results['entries'] if e and e.get('id')
+                ]
     except Exception as e:
-        print("ERROR when searching with YTMusic. Using video search for fallback")
-        return get_youtube_url(query)
+        print(f"Search failed: {e}")
+    return []
+
+
+async def search_music(query, max_results=5):
+    """Search YouTube for music, return list of (url, title) tuples."""
+    return await asyncio.to_thread(_search_music_sync, query, max_results)
+
+
+async def get_music_url(query):
+    """Get first music result URL (used as fallback)."""
+    results = await search_music(query, max_results=1)
+    return results[0][0] if results else None
 
 
 def get_youtube_url(search_query):
@@ -157,9 +175,37 @@ def int_to_emojis(num):
     return ['💯', '➕']
 
 async def play(client, message, voice):
-    urls = parse_query(message.content)
+    result = parse_query(message.content)
     id = message.guild.id
 
+    # Handle search query - show selection
+    if isinstance(result, tuple) and result[0] == "SEARCH":
+        search_query = result[1]
+        results = await search_music(search_query, max_results=5)
+        if not results:
+            return actions.ERR, discord.Embed(description=f"No results for '{search_query}' 🥺")
+        
+        # Build selection embed
+        desc = "\n".join([f"{SONG_EMOJIS[i]} {title[:60]}" for i, (url, title) in enumerate(results)])
+        embed = discord.Embed(title=f"🔍 Results for: {search_query[:50]}", description=desc, color=discord.Color.blue())
+        
+        sent = await message.channel.send(embed=embed)
+        urls = [url for url, _ in results]
+        song_selections[(sent.channel.id, sent.id)] = {
+            "author_id": message.author.id,
+            "urls": urls,
+            "original_msg_id": message.id,
+            "guild_id": id,
+            "voice": voice
+        }
+        try:
+            for i in range(len(results)):
+                await sent.add_reaction(SONG_EMOJIS[i])
+        except discord.NotFound:
+            pass  # Message was deleted (user already selected)
+        return actions.IGNORE, None
+
+    urls = result
     if not urls:
         return actions.ERR, discord.Embed(description=f"Couldn't find song or playlist matching your query, sorry 🥺",)
 
@@ -288,7 +334,7 @@ async def join(client, message, voice, urls_to_play=None):
                 await make_tts(url[6:])
                 url = None
             if url and not url.startswith("https://www.youtube.com/watch?v="):
-                url = get_music_url(url)
+                url = await get_music_url(url)
 
             if await play_url(voice_clients[id], url):
                 if not url: url = "Text to Speech"
@@ -346,6 +392,58 @@ async def skip(client, message, voice):
     vc = voice_clients[message.guild.id]
     vc.stop()
     return actions.IGNORE, None
+
+
+async def handle_song_selection(client, payload):
+    """Handle reaction on song selection message."""
+    k = (payload.channel_id, payload.message_id)
+    
+    if k not in song_selections:
+        return
+    
+    selection = song_selections[k]
+    
+    # Only original author can select
+    if payload.user_id != selection["author_id"]:
+        return
+    
+    # Check if valid song emoji
+    emoji = str(payload.emoji)
+    if emoji not in SONG_EMOJIS:
+        return
+    
+    idx = SONG_EMOJIS.index(emoji)
+    if idx >= len(selection["urls"]):
+        return
+    
+    # Remove from selections immediately to prevent duplicate processing from spam
+    url = selection["urls"][idx]
+    guild_id = selection["guild_id"]
+    voice = selection["voice"]
+    original_msg_id = selection["original_msg_id"]
+    del song_selections[k]
+    
+    # Delete selection message
+    try:
+        msg = await client.get_channel(k[0]).fetch_message(k[1])
+        await msg.delete()
+    except:
+        pass  # Already deleted
+    
+    # Get original message for context
+    try:
+        original_msg = await client.get_channel(k[0]).fetch_message(original_msg_id)
+    except:
+        return
+    
+    # Queue the song
+    if guild_id not in voice_clients or not voice_clients[guild_id].is_connected:
+        await join(client, original_msg, voice, [url])
+    else:
+        await queues[guild_id].put(url)
+        for emoji in ['📥'] + int_to_emojis(queues[guild_id].qsize()):
+            await original_msg.add_reaction(emoji)
+
 
 def get_help(commands, vc_commands):
     markdown = ""
