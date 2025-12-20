@@ -16,7 +16,6 @@ SP_CLIENT_SECRET = getenv("spotify_secret")
 
 queues = {}
 voice_clients = {}
-now_playing_msg = {}
 now_playing_controls = {}  # (channel_id, msg_id) -> guild_id
 song_selections = {}  # (channel_id, msg_id) -> {"author_id": int, "urls": [str], "original_msg_id": int}
 SONG_EMOJIS = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣']
@@ -111,12 +110,6 @@ def parse_query(query):
     yt_urls = parse_youtube_link(query)
     if yt_urls: return yt_urls
 
-    # Parse video search query
-    match = re.match(r"^\s*\./play_video\s+", query)
-    if match:
-        query = query[match.end():]
-        return [get_youtube_url(query)]
-
     # Parse music search query - return ("SEARCH", query) for selection
     match = re.match(r"^\s*\./play\s+", query)
     if match:
@@ -152,21 +145,6 @@ async def get_music_url(query):
     """Get first music result URL (used as fallback)."""
     results = await search_music(query, max_results=1)
     return results[0][0] if results else None
-
-
-def get_youtube_url(search_query):
-    ydl_opts = {
-        'default_search': 'ytsearch1',
-        'format': 'bestaudio/best',
-        'no_warnings': True,
-    }
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        search_results = ydl.extract_info(search_query, download=False)
-        if 'entries' in search_results and search_results['entries']:
-            video_url = search_results['entries'][0]['webpage_url']
-            return video_url
-        else:
-            return None
 def int_to_emojis(num):
     digit_emojis = ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
     if 0 <= num < 10:
@@ -585,7 +563,6 @@ async def handle_music(client, message):
     vc_commands = [
         (r"^\s*\./join\s*$", join, "Join your voice channel"),
         (r"^\s*\./play\s+", play, "Play song; Provide song name or Spotify/Youtube playlist or song links"),
-        (r"^\s*\./play_video\s+", play, "Similar to ./play but search for YouTube video version instead"),
 #       (r"^\s*\./queue\s*$", get_queue, "See the songs queue"),
         (r"^\s*\./(skip|next)\s*$", skip, "Skip to next song in queue"),
         (r"^\s*\./tts\s+", tts, "Play tts text"),
