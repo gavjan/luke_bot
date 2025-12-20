@@ -137,7 +137,7 @@ def get_youtube_url(search_query):
     ydl_opts = {
         'default_search': 'ytsearch1',
         'format': 'bestaudio/best',
-        'quiet': True
+        'no_warnings': True,
     }
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         search_results = ydl.extract_info(search_query, download=False)
@@ -224,6 +224,8 @@ async def play_url(vc, url):
         'prefer_ffmpeg': True,
         'keepvideo': False,
         'youtube_include_dash_manifest': False,
+        'quiet': True,
+        'no_warnings': True,
     }
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         try:
@@ -231,10 +233,17 @@ async def play_url(vc, url):
         except Exception as e:
             return False
         audio_url = info_dict.get("url", None)
+        if not audio_url:
+            print(f"[luke] No audio URL extracted for {url}")
+            return False
+
+    def after_callback(error):
+        if error:
+            print(f"[luke] Playback error: {error}")
 
     audio_source = discord.FFmpegPCMAudio(audio_url, before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", options="-vn -buffer_size 64K")
     
-    vc.play(audio_source)
+    vc.play(audio_source, after=after_callback)
     return True
 
 async def join(client, message, voice, urls_to_play=None):
