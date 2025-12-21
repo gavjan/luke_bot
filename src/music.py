@@ -23,6 +23,7 @@ CONTROL_SKIP = '⏩'
 CONTROL_STOP = '⏹️'
 
 async def make_tts(text, guild_id):
+    assert_folder(".tts")
     voice = "en-US-EmmaMultilingualNeural"
     communicate = edge_tts.Communicate(text, voice, volume="+100%")
     tts_path = f".tts/{guild_id}.mp3"
