@@ -22,11 +22,12 @@ SONG_EMOJIS = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣']
 CONTROL_SKIP = '⏩'
 CONTROL_STOP = '⏹️'
 
-async def make_tts(text):
+async def make_tts(text, guild_id):
     voice = "en-US-EmmaMultilingualNeural"
-
     communicate = edge_tts.Communicate(text, voice, volume="+100%")
-    await communicate.save("tts.mp3")
+    tts_path = f".tts/{guild_id}.mp3"
+    await communicate.save(tts_path)
+    return tts_path
 
 def yt_playlist_to_urls(playlist_id):
     """Extract playlist URLs using yt-dlp."""
@@ -217,23 +218,21 @@ async def leave(client, message, _):
     return actions.ERR, discord.Embed(description=f"I'm not in a VC",)
      
 
+
 async def tts(client, message, voice):
     id = message.guild.id
-
     match = re.match(r"^\s*\./tts\s+", message.content)
     tts_text = message.content[match.end():]
-    url = "tts://" + tts_text
-
+    url = f"tts://{id}/{tts_text}"
     if id not in voice_clients or not voice_clients[id].is_connected:
         return await join(client, message, voice, [url])
-
     await queues[id].put(url)
-
     return actions.REACT, ['📥'] + int_to_emojis(queues[id].qsize())
 
-def play_local_file(vc):
+def play_local_file(vc, guild_id):
+    tts_path = f".tts/{guild_id}.mp3"
     try:
-        vc.play(discord.FFmpegPCMAudio("tts.mp3"))
+        vc.play(discord.FFmpegPCMAudio(tts_path))
         return True
     except Exception as e:
         print(e)
@@ -241,7 +240,11 @@ def play_local_file(vc):
 
 async def play_url(vc, url):    
     if not url:
-        return play_local_file(vc)
+        # Try to get guild_id from vc if not provided
+        guild_id = getattr(vc, 'guild', None)
+        if guild_id:
+            guild_id = guild_id.id
+        return play_local_file(vc, guild_id)
     ydl_opts = {
         'format': 'bestaudio/best[height<=480]',
         'postprocessors': [{
@@ -314,7 +317,13 @@ async def join(client, message, voice, urls_to_play=None):
             if url == "kys":
                 return (actions.IGNORE, None)
             if url.startswith("tts://"):
-                await make_tts(url[6:])
+                # tts://{guild_id}/{text}
+                tts_match = re.match(r"tts://(\d+)/(.*)", url)
+                assert tts_match
+                guild_id = int(tts_match.group(1))
+                tts_text = tts_match.group(2)
+                await make_tts(tts_text, guild_id)
+                
                 url = None
             if url and not url.startswith("https://www.youtube.com/watch?v="):
                 url = await get_music_url(url)
