@@ -198,7 +198,7 @@ def calc_easter(year):
 
 def hisus_bd_reply():
     t = date.today()
-    if (t.day, t.month, t) in [(5, 1), (6, 1)]:
+    if (t.day, t.month) in [(5, 1), (6, 1)]:
         return actions.REPLY, "Ձեզ և մեզ մեծ Ավետիս"
     else:
         return actions.IGNORE, None
