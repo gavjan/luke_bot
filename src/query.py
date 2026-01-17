@@ -7,6 +7,8 @@ from terminal import handle as handle_term
 import discord
 from discord.utils import get
 
+from doom import doom_entry
+
 from cons import (DISCORD_MSG_LIMIT, load_json, actions, ADMIN_IDS, TUS_ID, TUS_THREAD_ID, SEED, COUNT_ID, START_DATE, GUGL_ID, err_exit,
                   load_page, rm_message, names_re, roles_re)
 from screenshot import create_message_image
@@ -347,6 +349,12 @@ async def parse_query(query, client, debug=False):
     ret = []
 #    if query.channel.id == COUNT_ID:
 #        ret.append(assert_count(content, query.author.id))
+
+    # DOOM minigame: /doom starts (resets) a new game; w/a/s/d/q/e steps the current game.
+    if re.match(r"^\s*/doom\s*$", content, re.IGNORECASE) or re.match(r"^\s*[wasdqe]\s*$", content, re.IGNORECASE):
+        if await doom_entry(client, query):
+            return [(actions.IGNORE, None)]
+
     handle_ret, response = handle_term(content, query.author.id)
     if handle_ret:
         response = f"$ {content}\n{response}" if content != "bash" else response
