@@ -63,7 +63,6 @@ def main():
                 elif action == actions.REACT:
                     for emoji_id in response:
                         emoji = get(client.emojis, name=emoji_id)
-                        await asyncio.sleep(0.3) # discord bugs out and doesn't display these reacts client-side
                         await message.add_reaction(emoji or emoji_id)
                 elif action == actions.BUTTONS:
                     sent = await message.reply(embed=response["embed"])
